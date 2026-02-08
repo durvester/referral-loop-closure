@@ -1,0 +1,14 @@
+{
+  "name": "referral-loop-closure",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "bun run server.ts",
+    "test": "bun test",
+    "dev": "bun --watch run server.ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

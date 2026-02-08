@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Bun
+bun.lockb
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+
+# Build
+dist/
+out/
+
+# Working files
+CLAUDE.md
+blog.md
+article.md

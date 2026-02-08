@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referral Dashboard — Dr. Robert Smith</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ─── Reset & Variables ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+
+  --blue-50: #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-400: #60a5fa;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-800: #1e40af;
+  --blue-900: #1e3a5f;
+
+  --amber-50: #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+
+  --green-50: #f0fdf4;
+  --green-100: #dcfce7;
+  --green-400: #4ade80;
+  --green-500: #22c55e;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+
+  --red-50: #fef2f2;
+  --red-100: #fee2e2;
+  --red-400: #f87171;
+  --red-500: #ef4444;
+  --red-600: #dc2626;
+  --red-700: #b91c1c;
+
+  --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 8px 30px rgba(15, 23, 42, 0.12);
+  --shadow-xl: 0 20px 60px rgba(15, 23, 42, 0.15);
+
+  --header-h: 64px;
+}
+
+html { font-size: 15px; }
+body {
+  font-family: var(--font-sans);
+  background: var(--slate-100);
+  color: var(--slate-800);
+  line-height: 1.55;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--slate-400); }
+
+/* ─── Header ─── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-h);
+  background: var(--slate-900);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-logo {
+  width: 36px;
+  height: 36px;
+  background: var(--blue-600);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-logo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+}
+
+.header-logo svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: white;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  position: relative;
+  z-index: 1;
+}
+
+.header-title {
+  font-size: 1.066rem;
+  font-weight: 600;
+  color: white;
+  letter-spacing: -0.02em;
+}
+
+.header-subtitle {
+  font-size: 0.733rem;
+  color: var(--slate-400);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--slate-400);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green-500);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.status-dot.disconnected {
+  background: var(--red-500);
+  animation: none;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0); }
+}
+
+.header-physician {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px 6px 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.physician-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--blue-600), var(--blue-800));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.733rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.02em;
+}
+
+.physician-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.physician-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  line-height: 1.2;
+}
+
+.physician-role {
+  font-size: 0.666rem;
+  color: var(--slate-400);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+/* ─── Main Layout ─── */
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  min-height: calc(100vh - var(--header-h));
+}
+
+.main-content {
+  padding: 24px 28px;
+  overflow-y: auto;
+}
+
+.sidebar {
+  background: var(--slate-900);
+  border-left: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ─── Summary Bar ─── */
+.summary-bar {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+  animation: fadeSlideUp 0.5s ease-out;
+}
+
+.stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.stat-card.total::before { background: var(--blue-500); }
+.stat-card.pending::before { background: var(--slate-400); }
+.stat-card.scheduled::before { background: var(--blue-400); }
+.stat-card.completed::before { background: var(--green-500); }
+.stat-card.overdue::before { background: var(--red-500); }
+
+.stat-label {
+  font-size: 0.733rem;
+  font-weight: 600;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 1.866rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--slate-800);
+}
+
+.stat-card.overdue .stat-value {
+  color: var(--red-600);
+}
+
+.stat-card.overdue.has-overdue {
+  background: var(--red-50);
+  border-color: var(--red-200);
+}
+
+.stat-card.overdue.has-overdue .stat-label {
+  color: var(--red-600);
+}
+
+/* ─── Section Headers ─── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 1.066rem;
+  font-weight: 700;
+  color: var(--slate-800);
+  letter-spacing: -0.02em;
+}
+
+.section-count {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--slate-500);
+  background: var(--slate-200);
+  padding: 3px 10px;
+  border-radius: 99px;
+}
+
+/* ─── Referral Table ─── */
+.referral-table-wrap {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+  overflow: hidden;
+  animation: fadeSlideUp 0.5s ease-out 0.1s both;
+}
+
+.referral-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.866rem;
+}
+
+.referral-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--slate-50);
+  font-weight: 600;
+  font-size: 0.733rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--slate-500);
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--slate-200);
+  white-space: nowrap;
+}
+
+.referral-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.referral-table tbody tr:last-child { border-bottom: none; }
+
+.referral-table tbody tr:hover {
+  background: var(--blue-50);
+}
+
+.referral-table tbody tr.expanded {
+  background: var(--blue-50);
+  border-bottom-color: transparent;
+}
+
+.referral-table tbody tr.row-pulse {
+  animation: rowPulse 1.5s ease-out;
+}
+
+@keyframes rowPulse {
+  0% { background: var(--blue-100); }
+  100% { background: transparent; }
+}
+
+.referral-table td {
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+.patient-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.patient-name {
+  font-weight: 600;
+  color: var(--slate-800);
+}
+
+.patient-dob {
+  font-size: 0.733rem;
+  color: var(--slate-500);
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+
+.provider-cell {
+  color: var(--slate-700);
+  font-weight: 500;
+}
+
+.reason-cell {
+  color: var(--slate-600);
+}
+
+.date-cell {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--slate-600);
+  white-space: nowrap;
+}
+
+/* ─── Status Badge ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-pending {
+  background: var(--slate-100);
+  color: var(--slate-600);
+  border: 1px solid var(--slate-200);
+}
+.badge-pending::before { background: var(--slate-400); }
+
+.badge-scheduled {
+  background: var(--blue-50);
+  color: var(--blue-700);
+  border: 1px solid var(--blue-200);
+}
+.badge-scheduled::before { background: var(--blue-500); }
+
+.badge-in-progress {
+  background: var(--amber-50);
+  color: var(--amber-700);
+  border: 1px solid var(--amber-100);
+}
+.badge-in-progress::before {
+  background: var(--amber-500);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.badge-completed {
+  background: var(--green-50);
+  color: var(--green-700);
+  border: 1px solid var(--green-100);
+}
+.badge-completed::before { background: var(--green-500); }
+
+.badge-overdue {
+  background: var(--red-50);
+  color: var(--red-700);
+  border: 1px solid var(--red-100);
+}
+.badge-overdue::before {
+  background: var(--red-500);
+  animation: pulse-dot 1s ease-in-out infinite;
+}
+
+/* ─── Actions Cell ─── */
+.actions-cell {
+  white-space: nowrap;
+}
+
+.btn-detail {
+  background: none;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  font-size: 0.733rem;
+  font-weight: 500;
+  color: var(--slate-600);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: var(--font-sans);
+}
+
+.btn-detail:hover {
+  background: var(--slate-800);
+  color: white;
+  border-color: var(--slate-800);
+}
+
+/* ─── Detail Panel (inline expand) ─── */
+.detail-row {
+  display: none;
+}
+
+.detail-row.visible {
+  display: table-row;
+}
+
+.detail-row td {
+  padding: 0;
+  background: var(--slate-50);
+  border-bottom: 2px solid var(--blue-200);
+}
+
+.detail-panel {
+  padding: 24px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+.detail-section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blue-600);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--blue-100);
+}
+
+.detail-field {
+  margin-bottom: 12px;
+}
+
+.detail-label {
+  font-size: 0.666rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--slate-400);
+  margin-bottom: 3px;
+}
+
+.detail-value {
+  font-size: 0.866rem;
+  color: var(--slate-800);
+  font-weight: 500;
+}
+
+.detail-value.mono {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+/* ─── Timeline ─── */
+.timeline {
+  position: relative;
+  padding-left: 28px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--slate-200);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.timeline-item:last-child { margin-bottom: 0; }
+
+.timeline-dot {
+  position: absolute;
+  left: -24px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--slate-200);
+}
+
+.timeline-dot.active {
+  box-shadow: 0 0 0 2px var(--blue-500);
+  background: var(--blue-500);
+}
+
+.timeline-dot.done {
+  background: var(--green-500);
+  box-shadow: 0 0 0 2px var(--green-500);
+}
+
+.timeline-dot.overdue {
+  background: var(--red-500);
+  box-shadow: 0 0 0 2px var(--red-500);
+}
+
+.timeline-dot.pending {
+  background: var(--slate-300);
+}
+
+.timeline-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--slate-700);
+}
+
+.timeline-time {
+  font-size: 0.666rem;
+  color: var(--slate-400);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+/* ─── Match Card ─── */
+.match-card {
+  background: white;
+  border: 1px solid var(--green-200);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.match-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.match-label {
+  font-size: 0.733rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--green-700);
+}
+
+.match-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.score-bar-bg {
+  width: 60px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--slate-200);
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--green-500);
+  transition: width 0.6s ease;
+}
+
+.score-text {
+  font-family: var(--font-mono);
+  font-size: 0.733rem;
+  font-weight: 600;
+  color: var(--green-700);
+}
+
+.match-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ─── Notes ─── */
+.notes-box {
+  background: var(--amber-50);
+  border: 1px solid var(--amber-100);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 0.8rem;
+  color: var(--amber-700);
+  line-height: 1.5;
+  margin-top: 12px;
+}
+
+.notes-box-title {
+  font-weight: 700;
+  font-size: 0.666rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  color: var(--amber-600);
+}
+
+/* ─── Sidebar ─── */
+.sidebar-header {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-title {
+  font-size: 0.866rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.01em;
+}
+
+.sidebar-desc {
+  font-size: 0.666rem;
+  color: var(--slate-400);
+  margin-top: 4px;
+}
+
+.event-feed {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.event-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.event-card.new-event {
+  animation: eventSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes eventSlideIn {
+  from { opacity: 0; transform: translateY(-16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.event-card:hover {
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.event-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.event-type {
+  font-size: 0.666rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.event-type.routed {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--blue-400);
+}
+
+.event-type.updated {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--green-400);
+}
+
+.event-time {
+  font-size: 0.666rem;
+  color: var(--slate-500);
+  font-family: var(--font-mono);
+}
+
+.event-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.event-patient {
+  font-size: 0.866rem;
+  font-weight: 600;
+  color: white;
+}
+
+.event-provider {
+  font-size: 0.8rem;
+  color: var(--slate-400);
+}
+
+.event-match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.event-match-label {
+  font-size: 0.666rem;
+  color: var(--slate-500);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.event-match-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.08);
+  overflow: hidden;
+}
+
+.event-match-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+.event-match-fill.high { background: var(--green-500); }
+.event-match-fill.medium { background: var(--amber-500); }
+.event-match-fill.low { background: var(--red-400); }
+
+.event-match-pct {
+  font-family: var(--font-mono);
+  font-size: 0.666rem;
+  font-weight: 600;
+  color: var(--slate-300);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ─── Overdue Section (sidebar) ─── */
+.overdue-section {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 16px 12px;
+}
+
+.overdue-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px;
+  margin-bottom: 12px;
+}
+
+.overdue-icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--red-400);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.overdue-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--red-400);
+}
+
+.overdue-card {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.overdue-card:last-child { margin-bottom: 0; }
+
+.overdue-patient {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--red-300);
+}
+
+.overdue-info {
+  font-size: 0.666rem;
+  color: var(--red-400);
+  margin-top: 3px;
+  opacity: 0.8;
+}
+
+/* ─── Empty State ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--slate-400);
+}
+
+.empty-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  fill: none;
+  stroke: var(--slate-300);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.empty-title {
+  font-size: 1.066rem;
+  font-weight: 600;
+  color: var(--slate-500);
+  margin-bottom: 6px;
+}
+
+.empty-desc {
+  font-size: 0.8rem;
+  color: var(--slate-400);
+}
+
+.sidebar .empty-state {
+  padding: 40px 20px;
+}
+
+.sidebar .empty-icon {
+  width: 40px;
+  height: 40px;
+  stroke: var(--slate-600);
+}
+
+.sidebar .empty-title {
+  font-size: 0.866rem;
+  color: var(--slate-500);
+}
+
+.sidebar .empty-desc {
+  font-size: 0.733rem;
+  color: var(--slate-600);
+}
+
+/* ─── Loading ─── */
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--slate-100) 25%, var(--slate-200) 50%, var(--slate-100) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-md);
+  height: 200px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Toast / Notification ─── */
+.toast-container {
+  position: fixed;
+  top: calc(var(--header-h) + 16px);
+  right: 368px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  background: var(--slate-900);
+  color: white;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.4s cubic-bezier(0.16, 1, 0.3, 1), toastOut 0.3s ease-in forwards;
+  animation-delay: 0s, 4s;
+  border-left: 3px solid var(--blue-500);
+  max-width: 380px;
+}
+
+.toast.success { border-left-color: var(--green-500); }
+.toast.warning { border-left-color: var(--amber-500); }
+.toast.error   { border-left-color: var(--red-500); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(20px); }
+}
+
+/* ─── Animations ─── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Responsive fallback ─── */
+@media (max-width: 1100px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    display: none;
+  }
+  .toast-container {
+    right: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-bar {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .referral-table {
+    font-size: 0.8rem;
+  }
+  .header {
+    padding: 0 16px;
+  }
+  .main-content {
+    padding: 16px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Header ─── -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+    </div>
+    <div>
+      <div class="header-title">Referral Dashboard</div>
+      <div class="header-subtitle">Loop Closure Tracking</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-status">
+      <span class="status-dot" id="sseStatus"></span>
+      <span id="sseLabel">Connecting</span>
+    </div>
+    <div class="header-physician">
+      <div class="physician-avatar">RS</div>
+      <div class="physician-info">
+        <span class="physician-name">Dr. Robert Smith</span>
+        <span class="physician-role">Primary Care</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ─── Main Layout ─── -->
+<div class="main-layout">
+
+  <!-- ─── Content Area ─── -->
+  <main class="main-content">
+
+    <!-- Summary Bar -->
+    <div class="summary-bar" id="summaryBar">
+      <div class="stat-card total">
+        <div class="stat-label">Total Referrals</div>
+        <div class="stat-value" id="statTotal">--</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" id="statPending">--</div>
+      </div>
+      <div class="stat-card scheduled">
+        <div class="stat-label">Scheduled</div>
+        <div class="stat-value" id="statScheduled">--</div>
+      </div>
+      <div class="stat-card completed">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" id="statCompleted">--</div>
+      </div>
+      <div class="stat-card overdue" id="overdueCard">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-value" id="statOverdue">--</div>
+      </div>
+    </div>
+
+    <!-- Referral Table -->
+    <div class="section-header">
+      <h2 class="section-title">Active Referrals</h2>
+      <span class="section-count" id="referralCount">0 referrals</span>
+    </div>
+
+    <div id="tableContainer">
+      <div class="loading-shimmer"></div>
+    </div>
+
+  </main>
+
+  <!-- ─── Sidebar ─── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Event Feed</div>
+      <div class="sidebar-desc">Real-time encounter routing</div>
+    </div>
+    <div class="event-feed" id="eventFeed">
+      <div class="empty-state">
+        <svg class="empty-icon" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <div class="empty-title">No events yet</div>
+        <div class="empty-desc">Routed encounters will appear here in real time</div>
+      </div>
+    </div>
+    <div class="overdue-section" id="overdueSection" style="display:none;">
+      <div class="overdue-header">
+        <svg class="overdue-icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div class="overdue-title">Action Required</div>
+      </div>
+      <div id="overdueList"></div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ─── Toast Container ─── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── State ──
+  let dashboardData = { referrals: [], routedEvents: [], overdue: [] };
+  let expandedRow = null;
+  let eventSource = null;
+  let eventCards = [];
+
+  // ── Helpers ──
+  function formatDate(iso) {
+    if (!iso) return '--';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function formatDateTime(iso) {
+    if (!iso) return '--';
+    const d = new Date(iso);
+    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '--';
+    const d = new Date(iso);
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+  }
+
+  function timeAgo(iso) {
+    if (!iso) return '';
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+
+  function patientName(patient) {
+    if (!patient || !patient.name || !patient.name[0]) return 'Unknown';
+    const n = patient.name[0];
+    const given = (n.given || []).join(' ');
+    return (given + ' ' + (n.family || '')).trim();
+  }
+
+  function getBusinessStatus(task) {
+    if (!task || !task.businessStatus) return 'awaiting-scheduling';
+    const coding = task.businessStatus.coding;
+    if (coding && coding.length > 0) return coding[0].code;
+    return 'awaiting-scheduling';
+  }
+
+  function statusLabel(code) {
+    const map = {
+      'awaiting-scheduling': 'Pending',
+      'appointment-scheduled': 'Scheduled',
+      'encounter-in-progress': 'In Progress',
+      'encounter-completed': 'Completed',
+      'loop-closed': 'Completed',
+      'overdue': 'Overdue'
+    };
+    return map[code] || code;
+  }
+
+  function statusBadgeClass(code) {
+    const map = {
+      'awaiting-scheduling': 'badge-pending',
+      'appointment-scheduled': 'badge-scheduled',
+      'encounter-in-progress': 'badge-in-progress',
+      'encounter-completed': 'badge-completed',
+      'loop-closed': 'badge-completed',
+      'overdue': 'badge-overdue'
+    };
+    return map[code] || 'badge-pending';
+  }
+
+  function getDueDate(sr) {
+    return sr.occurrencePeriod && sr.occurrencePeriod.end ? sr.occurrencePeriod.end : null;
+  }
+
+  function getReason(sr) {
+    if (sr.reasonCode && sr.reasonCode[0] && sr.reasonCode[0].coding && sr.reasonCode[0].coding[0]) {
+      return sr.reasonCode[0].coding[0].display || sr.reasonCode[0].text || '--';
+    }
+    if (sr.reasonCode && sr.reasonCode[0] && sr.reasonCode[0].text) {
+      return sr.reasonCode[0].text;
+    }
+    return '--';
+  }
+
+  function getPerformer(sr) {
+    if (sr.performer && sr.performer[0]) return sr.performer[0].display || '--';
+    return '--';
+  }
+
+  function getCodeText(sr) {
+    if (sr.code && sr.code.text) return sr.code.text;
+    return '--';
+  }
+
+  function getNotes(sr) {
+    if (sr.note && sr.note[0]) return sr.note[0].text;
+    return null;
+  }
+
+  function matchConfidenceLevel(score) {
+    if (score >= 0.8) return 'high';
+    if (score >= 0.5) return 'medium';
+    return 'low';
+  }
+
+  // ── Toast ──
+  function showToast(message, type) {
+    type = type || 'info';
+    var container = document.getElementById('toastContainer');
+    var toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(function() {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 4500);
+  }
+
+  // ── Update Summary Stats ──
+  function updateSummary() {
+    var referrals = dashboardData.referrals || [];
+    var overdue = dashboardData.overdue || [];
+
+    var total = referrals.length;
+    var pending = 0, scheduled = 0, completed = 0, overdueCount = overdue.length;
+
+    referrals.forEach(function(r) {
+      var bs = getBusinessStatus(r.task);
+      if (bs === 'awaiting-scheduling') pending++;
+      else if (bs === 'appointment-scheduled') scheduled++;
+      else if (bs === 'loop-closed' || bs === 'encounter-completed') completed++;
+    });
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statPending').textContent = pending;
+    document.getElementById('statScheduled').textContent = scheduled;
+    document.getElementById('statCompleted').textContent = completed;
+    document.getElementById('statOverdue').textContent = overdueCount;
+
+    var overdueCard = document.getElementById('overdueCard');
+    if (overdueCount > 0) {
+      overdueCard.classList.add('has-overdue');
+    } else {
+      overdueCard.classList.remove('has-overdue');
+    }
+
+    document.getElementById('referralCount').textContent = total + ' referral' + (total !== 1 ? 's' : '');
+  }
+
+  // ── Render Referral Table ──
+  function renderTable() {
+    var referrals = dashboardData.referrals || [];
+    var overdue = dashboardData.overdue || [];
+    var container = document.getElementById('tableContainer');
+
+    if (referrals.length === 0) {
+      container.innerHTML =
+        '<div class="referral-table-wrap">' +
+          '<div class="empty-state">' +
+            '<svg class="empty-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/></svg>' +
+            '<div class="empty-title">No referrals found</div>' +
+            '<div class="empty-desc">Create a referral to begin tracking</div>' +
+          '</div>' +
+        '</div>';
+      return;
+    }
+
+    var html = '<div class="referral-table-wrap"><table class="referral-table"><thead><tr>';
+    html += '<th>Patient</th><th>Referred To</th><th>Reason</th><th>Created</th><th>Due Date</th><th>Status</th><th></th>';
+    html += '</tr></thead><tbody>';
+
+    referrals.forEach(function(ref, idx) {
+      var sr = ref.serviceRequest;
+      var task = ref.task;
+      var patient = ref.patient;
+      var bs = getBusinessStatus(task);
+      var isOverdue = overdue.indexOf(task.id) >= 0;
+      if (isOverdue) bs = 'overdue';
+      var isExpanded = expandedRow === sr.id;
+
+      html += '<tr data-idx="' + idx + '" data-srid="' + sr.id + '" class="' + (isExpanded ? 'expanded' : '') + '" onclick="window._toggleDetail(\'' + sr.id + '\')">';
+      html += '<td><div class="patient-cell"><span class="patient-name">' + patientName(patient) + '</span>';
+      if (patient && patient.birthDate) {
+        html += '<span class="patient-dob">DOB: ' + formatDate(patient.birthDate) + '</span>';
+      }
+      html += '</div></td>';
+      html += '<td class="provider-cell">' + getPerformer(sr) + '</td>';
+      html += '<td class="reason-cell">' + getReason(sr) + '</td>';
+      html += '<td class="date-cell">' + formatDate(sr.authoredOn) + '</td>';
+      html += '<td class="date-cell">' + formatDate(getDueDate(sr)) + '</td>';
+      html += '<td><span class="badge ' + statusBadgeClass(bs) + '">' + statusLabel(bs) + '</span></td>';
+      html += '<td class="actions-cell"><button class="btn-detail" onclick="event.stopPropagation(); window._toggleDetail(\'' + sr.id + '\')">' + (isExpanded ? 'Close' : 'Details') + '</button></td>';
+      html += '</tr>';
+
+      // Detail row
+      html += '<tr class="detail-row ' + (isExpanded ? 'visible' : '') + '"><td colspan="7">';
+      html += renderDetail(ref, isOverdue);
+      html += '</td></tr>';
+    });
+
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+  }
+
+  function renderDetail(ref, isOverdue) {
+    var sr = ref.serviceRequest;
+    var task = ref.task;
+    var patient = ref.patient;
+    var bs = getBusinessStatus(task);
+    if (isOverdue) bs = 'overdue';
+
+    // Find matching routed events
+    var events = (dashboardData.routedEvents || []).filter(function(e) {
+      return e.taskId === task.id;
+    });
+
+    var html = '<div class="detail-panel"><div class="detail-grid">';
+
+    // Column 1: Referral Info
+    html += '<div>';
+    html += '<div class="detail-section-title">Referral Details</div>';
+    html += '<div class="detail-field"><div class="detail-label">Service</div><div class="detail-value">' + getCodeText(sr) + '</div></div>';
+    html += '<div class="detail-field"><div class="detail-label">Reason</div><div class="detail-value">' + getReason(sr) + '</div></div>';
+    html += '<div class="detail-field"><div class="detail-label">Referred By</div><div class="detail-value">' + (sr.requester ? sr.requester.display || '--' : '--') + '</div></div>';
+    html += '<div class="detail-field"><div class="detail-label">Referred To</div><div class="detail-value">' + getPerformer(sr) + '</div></div>';
+    html += '<div class="detail-field"><div class="detail-label">Referral ID</div><div class="detail-value mono">' + sr.id + '</div></div>';
+    html += '<div class="detail-field"><div class="detail-label">Task ID</div><div class="detail-value mono">' + task.id + '</div></div>';
+
+    var notes = getNotes(sr);
+    if (notes) {
+      html += '<div class="notes-box"><div class="notes-box-title">Referral Notes</div>' + escapeHtml(notes) + '</div>';
+    }
+    html += '</div>';
+
+    // Column 2: Timeline
+    html += '<div>';
+    html += '<div class="detail-section-title">Status Timeline</div>';
+    html += renderTimeline(task, sr, bs);
+    html += '</div>';
+
+    // Column 3: Encounter Match
+    html += '<div>';
+    html += '<div class="detail-section-title">Encounter Match</div>';
+    if (events.length > 0) {
+      events.forEach(function(evt) {
+        html += renderMatchCard(evt);
+      });
+    } else {
+      html += '<div style="color: var(--slate-400); font-size: 0.8rem; padding: 12px 0;">No encounters matched to this referral yet.</div>';
+    }
+    html += '</div>';
+
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderTimeline(task, sr, currentStatus) {
+    var steps = [
+      { code: 'awaiting-scheduling', label: 'Referral Created', time: sr.authoredOn },
+      { code: 'appointment-scheduled', label: 'Appointment Scheduled', time: null },
+      { code: 'encounter-in-progress', label: 'Encounter In Progress', time: null },
+      { code: 'loop-closed', label: 'Loop Closed', time: null }
+    ];
+
+    var statusOrder = ['awaiting-scheduling', 'appointment-scheduled', 'encounter-in-progress', 'loop-closed'];
+    var currentIdx = statusOrder.indexOf(currentStatus === 'overdue' ? getBusinessStatus(task) : currentStatus);
+    if (currentStatus === 'overdue') currentIdx = -2;
+
+    var html = '<div class="timeline">';
+
+    steps.forEach(function(step, i) {
+      var dotClass = '';
+      if (currentStatus === 'overdue') {
+        dotClass = i === 0 ? 'done' : 'overdue';
+      } else if (currentStatus === 'loop-closed' || i < currentIdx) {
+        dotClass = 'done';
+      } else if (i === currentIdx) {
+        dotClass = 'active';
+      } else {
+        dotClass = 'pending';
+      }
+
+      var time = '';
+      if (i === 0) time = formatDateTime(sr.authoredOn);
+      else if (i <= currentIdx && task.lastModified) time = formatDateTime(task.lastModified);
+
+      html += '<div class="timeline-item">';
+      html += '<div class="timeline-dot ' + dotClass + '"></div>';
+      html += '<div class="timeline-title">' + step.label + '</div>';
+      if (time) html += '<div class="timeline-time">' + time + '</div>';
+      html += '</div>';
+    });
+
+    if (currentStatus === 'overdue') {
+      html += '<div class="timeline-item">';
+      html += '<div class="timeline-dot overdue"></div>';
+      html += '<div class="timeline-title" style="color: var(--red-600); font-weight: 700;">Overdue</div>';
+      html += '<div class="timeline-time">Past due date: ' + formatDate(getDueDate(task.focus ? { occurrencePeriod: task.restriction && task.restriction.period } : {})) + '</div>';
+      html += '</div>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function encounterStatusBadge(status) {
+    var map = {
+      'planned': 'badge-scheduled',
+      'in-progress': 'badge-in-progress',
+      'arrived': 'badge-in-progress',
+      'triaged': 'badge-in-progress',
+      'finished': 'badge-completed',
+      'cancelled': 'badge-overdue'
+    };
+    var cls = map[status] || 'badge-pending';
+    return '<span class="badge ' + cls + '">' + (status || 'unknown') + '</span>';
+  }
+
+  function getEncounterType(enc) {
+    if (enc.type && enc.type[0]) {
+      var t = enc.type[0];
+      if (t.text) return t.text;
+      if (t.coding && t.coding[0]) return t.coding[0].display || '--';
+    }
+    return '--';
+  }
+
+  function getEncounterReason(enc) {
+    if (enc.reasonCode && enc.reasonCode[0]) {
+      var r = enc.reasonCode[0];
+      if (r.text) return r.text;
+      if (r.coding && r.coding[0]) return r.coding[0].display || '--';
+    }
+    return '--';
+  }
+
+  function getEncounterPractitioner(enc) {
+    if (enc.participant && enc.participant[0] && enc.participant[0].individual) {
+      return enc.participant[0].individual.display || '--';
+    }
+    return '--';
+  }
+
+  function getEncounterPractitionerNpi(enc) {
+    if (enc.participant && enc.participant[0] && enc.participant[0].individual) {
+      var ind = enc.participant[0].individual;
+      if (ind.identifier && ind.identifier.value) return ind.identifier.value;
+    }
+    return null;
+  }
+
+  function renderMatchCard(evt) {
+    var score = evt.matchScore || 0;
+    var pct = Math.round(score * 100);
+    var confidence = matchConfidenceLevel(score);
+    var enc = evt.encounter || evt.encounterData || {};
+
+    var html = '<div class="match-card">';
+    html += '<div class="match-header"><span class="match-label">Matched Encounter</span>';
+    html += '<div class="match-score"><div class="score-bar-bg"><div class="score-bar-fill" style="width:' + pct + '%"></div></div>';
+    html += '<span class="score-text">' + pct + '%</span></div></div>';
+    html += '<div class="match-details">';
+
+    // Status badge
+    if (enc.status) {
+      html += '<div class="detail-field"><div class="detail-label">Status</div><div class="detail-value">' + encounterStatusBadge(enc.status) + '</div></div>';
+    }
+
+    // Encounter type (e.g. "Follow-up consultation for Alice M Rodriguez")
+    var encType = getEncounterType(enc);
+    if (encType !== '--') {
+      html += '<div class="detail-field"><div class="detail-label">Type</div><div class="detail-value">' + encType + '</div></div>';
+    }
+
+    // Facility
+    if (enc.serviceProvider && enc.serviceProvider.display) {
+      html += '<div class="detail-field"><div class="detail-label">Facility</div><div class="detail-value">' + enc.serviceProvider.display + '</div></div>';
+    }
+
+    // Practitioner
+    var practitioner = getEncounterPractitioner(enc);
+    if (practitioner !== '--') {
+      var npi = getEncounterPractitionerNpi(enc);
+      html += '<div class="detail-field"><div class="detail-label">Practitioner</div><div class="detail-value">' + practitioner + (npi ? ' <span style="color:var(--slate-400);font-size:0.733rem">(NPI: ' + npi + ')</span>' : '') + '</div></div>';
+    }
+
+    // Reason (e.g. "Chest pain")
+    var reason = getEncounterReason(enc);
+    if (reason !== '--') {
+      html += '<div class="detail-field"><div class="detail-label">Reason</div><div class="detail-value">' + reason + '</div></div>';
+    }
+
+    // Class (AMB, EMER, etc.)
+    if (enc.class && enc.class.display) {
+      html += '<div class="detail-field"><div class="detail-label">Class</div><div class="detail-value" style="text-transform:capitalize">' + enc.class.display + '</div></div>';
+    }
+
+    // Date
+    if (enc.period && enc.period.start) {
+      html += '<div class="detail-field"><div class="detail-label">Encounter Date</div><div class="detail-value">' + formatDateTime(enc.period.start) + '</div></div>';
+    }
+
+    // IDs
+    html += '<div class="detail-field"><div class="detail-label">Encounter ID</div><div class="detail-value mono">' + (evt.encounterId || '--') + '</div></div>';
+    html += '<div class="detail-field"><div class="detail-label">Routed At</div><div class="detail-value">' + formatDateTime(evt.routedAt) + '</div></div>';
+
+    html += '</div></div>';
+    return html;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // ── Render Sidebar Events ──
+  function renderEventFeed() {
+    var events = dashboardData.routedEvents || [];
+    var container = document.getElementById('eventFeed');
+
+    if (events.length === 0) {
+      container.innerHTML =
+        '<div class="empty-state">' +
+          '<svg class="empty-icon" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
+          '<div class="empty-title">No events yet</div>' +
+          '<div class="empty-desc">Routed encounters will appear here in real time</div>' +
+        '</div>';
+      return;
+    }
+
+    // Show events newest first
+    var sorted = events.slice().reverse();
+    var html = '';
+    sorted.forEach(function(evt, i) {
+      var enc = evt.encounter || {};
+      var score = evt.matchScore || 0;
+      var pct = Math.round(score * 100);
+      var confidence = matchConfidenceLevel(score);
+
+      // Try to find patient name from referrals
+      var pName = 'Unknown Patient';
+      dashboardData.referrals.forEach(function(r) {
+        if (r.task.id === evt.taskId) {
+          pName = patientName(r.patient);
+        }
+      });
+
+      var providerDisplay = '';
+      if (enc.serviceProvider && enc.serviceProvider.display) {
+        providerDisplay = enc.serviceProvider.display;
+      } else if (enc.participant && enc.participant[0] && enc.participant[0].individual) {
+        providerDisplay = enc.participant[0].individual.display || '';
+      }
+
+      var encStatus = enc.status || '';
+      var encType = '';
+      if (enc.type && enc.type[0]) {
+        encType = enc.type[0].text || (enc.type[0].coding && enc.type[0].coding[0] ? enc.type[0].coding[0].display : '');
+      }
+      var encReason = '';
+      if (enc.reasonCode && enc.reasonCode[0]) {
+        encReason = enc.reasonCode[0].text || (enc.reasonCode[0].coding && enc.reasonCode[0].coding[0] ? enc.reasonCode[0].coding[0].display : '');
+      }
+      var practDisplay = '';
+      if (enc.participant && enc.participant[0] && enc.participant[0].individual) {
+        practDisplay = enc.participant[0].individual.display || '';
+      }
+
+      html += '<div class="event-card' + (i === 0 && eventCards.indexOf(evt.id) < 0 ? ' new-event' : '') + '">';
+      html += '<div class="event-top">';
+      html += '<span class="event-type routed">Encounter Routed</span>';
+      if (encStatus) {
+        html += '<span class="badge" style="padding:2px 8px;font-size:0.6rem;' +
+          (encStatus === 'planned' ? 'background:var(--blue-50);color:var(--blue-700);border:1px solid var(--blue-200)' :
+           encStatus === 'in-progress' ? 'background:var(--amber-50);color:var(--amber-700);border:1px solid var(--amber-100)' :
+           encStatus === 'finished' ? 'background:var(--green-50);color:var(--green-700);border:1px solid var(--green-100)' :
+           'background:rgba(255,255,255,0.08);color:var(--slate-300);border:1px solid rgba(255,255,255,0.1)') +
+          '">' + encStatus + '</span>';
+      }
+      html += '<span class="event-time">' + timeAgo(evt.routedAt) + '</span>';
+      html += '</div>';
+      html += '<div class="event-body">';
+      html += '<div class="event-patient">' + pName + '</div>';
+      if (providerDisplay) {
+        html += '<div class="event-provider">' + providerDisplay;
+        if (practDisplay && practDisplay !== providerDisplay) {
+          html += ' &middot; ' + practDisplay;
+        }
+        html += '</div>';
+      } else if (practDisplay) {
+        html += '<div class="event-provider">' + practDisplay + '</div>';
+      }
+      if (encType || encReason) {
+        html += '<div class="event-provider" style="font-size:0.733rem;color:var(--slate-500)">';
+        if (encType) html += encType;
+        if (encType && encReason) html += ' &mdash; ';
+        if (encReason) html += encReason;
+        html += '</div>';
+      }
+      if (score > 0) {
+        html += '<div class="event-match">';
+        html += '<span class="event-match-label">Match</span>';
+        html += '<div class="event-match-bar"><div class="event-match-fill ' + confidence + '" style="width:' + pct + '%"></div></div>';
+        html += '<span class="event-match-pct">' + pct + '%</span>';
+        html += '</div>';
+      }
+      html += '</div></div>';
+    });
+
+    container.innerHTML = html;
+
+    // Track known events
+    events.forEach(function(e) {
+      if (eventCards.indexOf(e.id) < 0) eventCards.push(e.id);
+    });
+  }
+
+  // ── Render Overdue Section ──
+  function renderOverdue() {
+    var overdue = dashboardData.overdue || [];
+    var section = document.getElementById('overdueSection');
+    var list = document.getElementById('overdueList');
+
+    if (overdue.length === 0) {
+      section.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    var html = '';
+
+    overdue.forEach(function(taskId) {
+      // Find the referral for this task
+      var found = null;
+      dashboardData.referrals.forEach(function(r) {
+        if (r.task.id === taskId) found = r;
+      });
+
+      if (found) {
+        html += '<div class="overdue-card">';
+        html += '<div class="overdue-patient">' + patientName(found.patient) + '</div>';
+        html += '<div class="overdue-info">' + getPerformer(found.serviceRequest) + ' &middot; Due: ' + formatDate(getDueDate(found.serviceRequest)) + '</div>';
+        html += '</div>';
+      }
+    });
+
+    list.innerHTML = html;
+  }
+
+  // ── Full Render ──
+  function render() {
+    updateSummary();
+    renderTable();
+    renderEventFeed();
+    renderOverdue();
+  }
+
+  // ── Toggle Detail ──
+  window._toggleDetail = function(srId) {
+    expandedRow = expandedRow === srId ? null : srId;
+    renderTable();
+  };
+
+  // ── Pulse a row when updated ──
+  function pulseRow(taskId) {
+    var rows = document.querySelectorAll('.referral-table tbody tr[data-srid]');
+    dashboardData.referrals.forEach(function(r, idx) {
+      if (r.task.id === taskId) {
+        var row = document.querySelector('tr[data-idx="' + idx + '"]');
+        if (row) {
+          row.classList.remove('row-pulse');
+          void row.offsetWidth; // force reflow
+          row.classList.add('row-pulse');
+        }
+      }
+    });
+  }
+
+  // ── Fetch Dashboard Data ──
+  function fetchDashboard(callback) {
+    fetch('/physician/dashboard')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        dashboardData = data;
+        render();
+        if (callback) callback();
+      })
+      .catch(function(err) {
+        console.error('Failed to fetch dashboard:', err);
+        showToast('Failed to load dashboard data', 'error');
+      });
+  }
+
+  // ── SSE Connection ──
+  function connectSSE() {
+    var dot = document.getElementById('sseStatus');
+    var label = document.getElementById('sseLabel');
+
+    if (eventSource) {
+      eventSource.close();
+    }
+
+    eventSource = new EventSource('/physician/events');
+
+    eventSource.onopen = function() {
+      dot.classList.remove('disconnected');
+      label.textContent = 'Live';
+    };
+
+    eventSource.onmessage = function(e) {
+      try {
+        var event = JSON.parse(e.data);
+
+        if (event.type === 'connected') {
+          dot.classList.remove('disconnected');
+          label.textContent = 'Live';
+          return;
+        }
+
+        if (event.type === 'encounter-routed') {
+          showToast('New encounter routed: ' + (event.encounterId || ''), 'success');
+          // Refresh dashboard data
+          fetchDashboard(function() {
+            if (event.taskId) pulseRow(event.taskId);
+          });
+        }
+
+        if (event.type === 'encounter-updated') {
+          showToast('Encounter updated: ' + (event.encounterId || ''), 'info');
+          fetchDashboard(function() {
+            if (event.taskId) pulseRow(event.taskId);
+          });
+        }
+
+        if (event.type === 'task-updated') {
+          showToast('Task status updated', 'info');
+          fetchDashboard(function() {
+            if (event.taskId) pulseRow(event.taskId);
+          });
+        }
+
+      } catch (err) {
+        console.error('SSE parse error:', err);
+      }
+    };
+
+    eventSource.onerror = function() {
+      dot.classList.add('disconnected');
+      label.textContent = 'Disconnected';
+      // Retry in 5s
+      setTimeout(connectSSE, 5000);
+    };
+  }
+
+  // ── Init ──
+  fetchDashboard();
+  connectSSE();
+
+  // Periodically refresh (every 30s as fallback)
+  setInterval(function() { fetchDashboard(); }, 30000);
+
+})();
+</script>
+</body>
+</html>

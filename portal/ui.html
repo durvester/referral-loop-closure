@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Health Portal</title>
+<style>
+/* ===================================================================
+   DESIGN SYSTEM
+   Aesthetic: Warm, organic healthcare -- sage/teal palette with
+   golden accents. Think premium wellness clinic meets modern fintech.
+   Font: DM Serif Display (display) + DM Sans (body) from Google.
+   =================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap');
+
+:root {
+  /* Palette: Nature-inspired teal/sage */
+  --sage-50: #f4f7f4;
+  --sage-100: #e4ebe4;
+  --sage-200: #c9d7c9;
+  --sage-300: #a3bca3;
+  --sage-400: #7a9e7a;
+  --sage-500: #5a835a;
+  --sage-600: #476a47;
+  --sage-700: #3a553a;
+  --sage-800: #2f442f;
+  --sage-900: #1e2d1e;
+
+  --teal-50: #effefa;
+  --teal-100: #c7fff0;
+  --teal-200: #90f5dc;
+  --teal-300: #51e0c2;
+  --teal-400: #21c5a6;
+  --teal-500: #0a9d84;
+  --teal-600: #057f6c;
+  --teal-700: #086558;
+  --teal-800: #0b5047;
+  --teal-900: #0a3d37;
+
+  --gold-400: #d4a853;
+  --gold-500: #c49a3c;
+
+  --warm-white: #faf9f6;
+  --cream: #f5f2ec;
+  --stone-100: #ece9e1;
+  --stone-200: #d8d3c8;
+  --stone-400: #a9a295;
+  --stone-600: #716a5c;
+  --stone-800: #3d3830;
+  --stone-900: #2a2520;
+
+  /* Status colors */
+  --status-pending: #94a3b8;
+  --status-pending-bg: #f1f5f9;
+  --status-scheduled: #3b82f6;
+  --status-scheduled-bg: #eff6ff;
+  --status-in-progress: #d97706;
+  --status-in-progress-bg: #fffbeb;
+  --status-completed: #16a34a;
+  --status-completed-bg: #f0fdf4;
+  --status-overdue: #dc2626;
+  --status-overdue-bg: #fef2f2;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(30,45,30,0.05);
+  --shadow-md: 0 4px 16px rgba(30,45,30,0.08);
+  --shadow-lg: 0 8px 30px rgba(30,45,30,0.12);
+  --shadow-glow: 0 0 40px rgba(10,157,132,0.08);
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
+/* ===================================================================
+   RESET & BASE
+   =================================================================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--warm-white);
+  color: var(--stone-800);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ===================================================================
+   HEADER
+   =================================================================== */
+.header {
+  background: linear-gradient(135deg, var(--sage-800) 0%, var(--teal-800) 50%, var(--sage-700) 100%);
+  color: white;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 24px rgba(10,61,55,0.25);
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.header-text h1 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.header-greeting {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.connection-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.35rem 0.75rem;
+  background: rgba(255,255,255,0.08);
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.connection-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6ee7b7;
+  box-shadow: 0 0 6px #6ee7b7;
+  animation: pulse-dot 2.5s ease-in-out infinite;
+}
+
+.connection-dot.disconnected {
+  background: #fca5a5;
+  box-shadow: 0 0 6px #fca5a5;
+  animation: none;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Decorative header bottom edge */
+.header::after {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal-400), var(--gold-400), var(--teal-400));
+  opacity: 0.6;
+}
+
+/* ===================================================================
+   ONBOARDING WIZARD
+   =================================================================== */
+.wizard-overlay {
+  min-height: calc(100vh - 80px);
+  background: linear-gradient(180deg, var(--warm-white) 0%, var(--cream) 100%);
+  padding: 2.5rem 2rem 4rem;
+  animation: wizard-fade-in 0.5s ease-out;
+}
+
+.wizard-overlay.hidden {
+  display: none;
+}
+
+@keyframes wizard-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.wizard-container {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.wizard-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.wizard-header h2 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--stone-900);
+  margin-bottom: 0.35rem;
+  letter-spacing: 0.01em;
+}
+
+.wizard-header p {
+  font-size: 0.88rem;
+  color: var(--stone-600);
+  max-width: 440px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ---- Stepper ---- */
+.wizard-stepper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2.5rem;
+  position: relative;
+}
+
+.stepper-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  max-width: 130px;
+}
+
+.stepper-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 2px solid var(--stone-200);
+  background: white;
+  color: var(--stone-400);
+  position: relative;
+  z-index: 2;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stepper-step.active .stepper-circle {
+  border-color: var(--teal-500);
+  background: var(--teal-500);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(10,157,132,0.15), 0 2px 8px rgba(10,157,132,0.3);
+}
+
+.stepper-step.completed .stepper-circle {
+  border-color: var(--teal-500);
+  background: var(--teal-500);
+  color: white;
+}
+
+.stepper-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+  margin-top: 0.5rem;
+  text-align: center;
+  line-height: 1.3;
+  transition: color 0.3s;
+}
+
+.stepper-step.active .stepper-label {
+  color: var(--teal-700);
+}
+
+.stepper-step.completed .stepper-label {
+  color: var(--teal-600);
+}
+
+.stepper-line {
+  position: absolute;
+  top: 19px;
+  left: calc(50% + 22px);
+  right: calc(-50% + 22px);
+  height: 2px;
+  background: var(--stone-200);
+  z-index: 1;
+  transition: background 0.4s;
+}
+
+.stepper-step.completed .stepper-line {
+  background: var(--teal-400);
+}
+
+.stepper-step:last-child .stepper-line {
+  display: none;
+}
+
+/* ---- Step Cards ---- */
+.wizard-step {
+  display: none;
+  animation: step-enter 0.4s ease-out;
+}
+
+.wizard-step.active {
+  display: block;
+}
+
+@keyframes step-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--stone-100);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+  overflow: hidden;
+}
+
+.step-card-top {
+  padding: 1.75rem 2rem 1.5rem;
+  border-bottom: 1px solid var(--stone-100);
+  display: flex;
+  align-items: flex-start;
+  gap: 1.15rem;
+}
+
+.step-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.step-icon.identity {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+  color: #7c3aed;
+}
+.step-icon.network {
+  background: linear-gradient(135deg, var(--teal-100), var(--teal-200));
+  color: var(--teal-700);
+}
+.step-icon.auth {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #b45309;
+}
+.step-icon.subscribe {
+  background: linear-gradient(135deg, var(--sage-100), var(--sage-200));
+  color: var(--sage-700);
+}
+.step-icon.sharing {
+  background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+  color: #be185d;
+}
+
+.step-text h3 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--stone-900);
+  margin-bottom: 0.3rem;
+}
+
+.step-text p {
+  font-size: 0.82rem;
+  color: var(--stone-600);
+  line-height: 1.6;
+}
+
+.step-body {
+  padding: 1.75rem 2rem;
+}
+
+/* Form-style fields in step */
+.step-field {
+  margin-bottom: 1rem;
+}
+
+.step-field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+  margin-bottom: 0.35rem;
+  display: block;
+}
+
+.step-field-value {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--stone-800);
+  padding: 0.65rem 1rem;
+  background: var(--warm-white);
+  border: 1px solid var(--stone-100);
+  border-radius: var(--radius-sm);
+}
+
+/* Action area */
+.step-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.step-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.02em;
+}
+
+.step-btn-primary {
+  background: linear-gradient(135deg, var(--teal-600), var(--teal-700));
+  color: white;
+  box-shadow: 0 2px 10px rgba(10,157,132,0.3);
+}
+
+.step-btn-primary:hover {
+  background: linear-gradient(135deg, var(--teal-500), var(--teal-600));
+  box-shadow: 0 4px 18px rgba(10,157,132,0.4);
+  transform: translateY(-1px);
+}
+
+.step-btn-primary:active {
+  transform: translateY(0);
+}
+
+.step-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.step-btn-secondary {
+  background: var(--warm-white);
+  color: var(--stone-600);
+  border: 1px solid var(--stone-200);
+}
+
+.step-btn-secondary:hover {
+  background: var(--sage-50);
+  border-color: var(--sage-300);
+  color: var(--stone-800);
+}
+
+/* Loading spinner inside step */
+.step-loading {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+}
+
+.step-loading.active {
+  display: flex;
+}
+
+.step-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid var(--stone-100);
+  border-top-color: var(--teal-500);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.step-loading-text {
+  font-size: 0.84rem;
+  color: var(--teal-700);
+  font-weight: 500;
+}
+
+/* Success state */
+.step-success {
+  display: none;
+  padding: 1.25rem;
+  border-radius: var(--radius-md);
+  background: var(--teal-50);
+  border: 1px solid var(--teal-200);
+  margin-top: 1rem;
+  animation: step-enter 0.35s ease-out;
+}
+
+.step-success.active {
+  display: block;
+}
+
+.step-success-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.step-success-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--teal-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-success-check svg {
+  width: 12px;
+  height: 12px;
+  stroke: white;
+  stroke-width: 3;
+}
+
+.step-success-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--teal-800);
+}
+
+.step-success-detail {
+  font-size: 0.78rem;
+  color: var(--teal-700);
+  line-height: 1.55;
+  padding-left: 2rem;
+}
+
+.step-success-detail code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.74rem;
+  background: rgba(10,157,132,0.1);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  color: var(--teal-800);
+  word-break: break-all;
+}
+
+/* Step 5 sharing controls */
+.wiz-sharing-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--stone-100);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: var(--warm-white);
+  margin-bottom: 1rem;
+}
+
+.wiz-sharing-toggle:hover {
+  border-color: var(--sage-300);
+}
+
+.wiz-sharing-toggle.active {
+  border-color: var(--teal-500);
+  background: var(--teal-50);
+}
+
+.wiz-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--stone-200);
+  background: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 1px;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.wiz-checkbox:checked {
+  border-color: var(--teal-500);
+  background: var(--teal-500);
+}
+
+.wiz-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 6px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.wiz-sharing-text h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--stone-800);
+  margin-bottom: 0.15rem;
+}
+
+.wiz-sharing-text p {
+  font-size: 0.78rem;
+  color: var(--stone-600);
+  line-height: 1.5;
+}
+
+.wiz-sharing-modes {
+  display: none;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 0.5rem;
+  margin-bottom: 1rem;
+  animation: step-enter 0.3s ease-out;
+}
+
+.wiz-sharing-modes.visible {
+  display: flex;
+}
+
+.wiz-mode-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--stone-100);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.wiz-mode-option:hover {
+  border-color: var(--sage-300);
+  background: var(--sage-50);
+}
+
+.wiz-mode-option.active {
+  border-color: var(--teal-400);
+  background: var(--teal-50);
+}
+
+.wiz-mode-option input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--stone-200);
+  background: white;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.wiz-mode-option.active input[type="radio"] {
+  border-color: var(--teal-500);
+  background: var(--teal-500);
+}
+
+.wiz-mode-option.active input[type="radio"]::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: white;
+}
+
+.wiz-mode-label {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--stone-800);
+}
+
+/* Wizard to dashboard transition */
+@keyframes wizard-exit {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-20px); }
+}
+
+@keyframes dashboard-enter {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dashboard-wrap.entering {
+  animation: dashboard-enter 0.5s ease-out;
+}
+
+/* ===================================================================
+   MAIN LAYOUT
+   =================================================================== */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  align-items: start;
+}
+
+.main-content { display: flex; flex-direction: column; gap: 2rem; }
+.sidebar { display: flex; flex-direction: column; gap: 2rem; position: sticky; top: 90px; }
+
+/* ===================================================================
+   CARD BASE
+   =================================================================== */
+.card {
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--stone-100);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--sage-200);
+}
+
+.card-header {
+  padding: 1.25rem 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--stone-100);
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.card-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.card-title {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--stone-900);
+  letter-spacing: 0.01em;
+}
+
+.card-body { padding: 1.5rem; }
+
+/* ===================================================================
+   SECTION: MY REFERRALS
+   =================================================================== */
+.referrals-card .card-icon {
+  background: linear-gradient(135deg, var(--sage-100), var(--sage-200));
+  color: var(--sage-700);
+}
+
+.referral-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+  padding: 0.25rem 0.65rem;
+  background: var(--sage-50);
+  border-radius: 100px;
+  border: 1px solid var(--sage-200);
+}
+
+.referral-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.referral-item {
+  padding: 1.15rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--stone-100);
+  background: var(--warm-white);
+  transition: all 0.3s ease;
+  animation: slide-in 0.4s ease-out both;
+}
+
+.referral-item:hover {
+  border-color: var(--sage-200);
+  box-shadow: var(--shadow-md);
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.referral-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+  gap: 0.75rem;
+}
+
+.referral-reason {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1rem;
+  color: var(--stone-900);
+  line-height: 1.3;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 100px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-badge.pending { background: var(--status-pending-bg); color: var(--status-pending); }
+.status-badge.scheduled { background: var(--status-scheduled-bg); color: var(--status-scheduled); }
+.status-badge.in-progress { background: var(--status-in-progress-bg); color: var(--status-in-progress); }
+.status-badge.completed { background: var(--status-completed-bg); color: var(--status-completed); }
+.status-badge.overdue { background: var(--status-overdue-bg); color: var(--status-overdue); }
+
+.status-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.referral-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 1.5rem;
+}
+
+.referral-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.referral-detail-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+  margin-bottom: 0.1rem;
+}
+
+.referral-detail-value {
+  font-size: 0.84rem;
+  color: var(--stone-800);
+  font-weight: 500;
+}
+
+/* ===================================================================
+   SECTION: ENCOUNTERS
+   =================================================================== */
+.encounters-card .card-icon {
+  background: linear-gradient(135deg, #f5f0e6, #ebe4d4);
+  color: var(--gold-500);
+}
+
+.encounter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+/* Timeline connector line */
+.encounter-list::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 12px;
+  bottom: 12px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--sage-200), var(--stone-100));
+  border-radius: 2px;
+}
+
+.encounter-item {
+  display: flex;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  position: relative;
+  animation: slide-in 0.35s ease-out both;
+}
+
+.encounter-item + .encounter-item {
+  border-top: 1px solid var(--stone-100);
+}
+
+.encounter-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--sage-400);
+  border: 2px solid white;
+  box-shadow: 0 0 0 2px var(--sage-200);
+  flex-shrink: 0;
+  margin-top: 5px;
+  z-index: 1;
+  margin-left: 13px;
+}
+
+.encounter-dot.shared {
+  background: var(--teal-500);
+  box-shadow: 0 0 0 2px var(--teal-200);
+}
+
+.encounter-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.encounter-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+  gap: 0.5rem;
+}
+
+.encounter-provider {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--stone-800);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.encounter-sharing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 100px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.encounter-sharing-badge.shared {
+  background: var(--teal-50);
+  color: var(--teal-700);
+  border: 1px solid var(--teal-200);
+}
+
+.encounter-sharing-badge.private {
+  background: var(--stone-100);
+  color: var(--stone-400);
+  border: 1px solid var(--stone-200);
+}
+
+.encounter-meta {
+  font-size: 0.78rem;
+  color: var(--stone-600);
+}
+
+.encounter-meta span + span::before {
+  content: ' \00b7 ';
+  color: var(--stone-300);
+  padding: 0 0.15rem;
+}
+
+/* ===================================================================
+   SIDEBAR: NOTIFICATION FEED
+   =================================================================== */
+.notifications-card {
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+}
+
+.notifications-card .card-icon {
+  background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+  color: #be185d;
+}
+
+.notification-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-height: 500px;
+}
+
+.notification-list::-webkit-scrollbar { width: 4px; }
+.notification-list::-webkit-scrollbar-track { background: transparent; }
+.notification-list::-webkit-scrollbar-thumb { background: var(--stone-200); border-radius: 4px; }
+
+.notification-item {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid;
+  background: var(--warm-white);
+  font-size: 0.8rem;
+  animation: notif-in 0.35s ease-out both;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: var(--sage-50);
+}
+
+@keyframes notif-in {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.notification-item.type-encounter-stored {
+  border-left-color: var(--gold-400);
+}
+
+.notification-item.type-encounter-updated {
+  border-left-color: var(--gold-500);
+}
+
+.notification-item.type-encounter-routed {
+  border-left-color: var(--teal-500);
+}
+
+.notification-item.type-task-updated {
+  border-left-color: var(--sage-500);
+}
+
+.notification-time {
+  font-size: 0.68rem;
+  color: var(--stone-400);
+  margin-bottom: 0.2rem;
+  font-weight: 500;
+}
+
+.notification-text {
+  color: var(--stone-800);
+  line-height: 1.45;
+}
+
+.notification-type-tag {
+  display: inline-block;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  margin-top: 0.35rem;
+}
+
+.type-encounter-stored .notification-type-tag {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.type-encounter-updated .notification-type-tag {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.type-encounter-routed .notification-type-tag {
+  background: var(--teal-100);
+  color: var(--teal-800);
+}
+
+.type-task-updated .notification-type-tag {
+  background: var(--sage-100);
+  color: var(--sage-800);
+}
+
+/* ===================================================================
+   EMPTY STATES
+   =================================================================== */
+.empty-state {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: var(--stone-400);
+}
+
+.empty-state-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--stone-600);
+  margin-bottom: 0.35rem;
+}
+
+.empty-state p {
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+/* ===================================================================
+   LOADING STATES
+   =================================================================== */
+.skeleton {
+  background: linear-gradient(90deg, var(--stone-100) 25%, var(--cream) 50%, var(--stone-100) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-line {
+  height: 14px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-line.short { width: 60%; }
+.skeleton-line.medium { width: 80%; }
+
+/* ===================================================================
+   TOAST
+   =================================================================== */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.toast {
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  animation: toast-in 0.35s ease-out, toast-out 0.3s ease-in forwards;
+  animation-delay: 0s, 3.5s;
+  max-width: 340px;
+}
+
+.toast.success {
+  background: var(--teal-700);
+  color: white;
+}
+
+.toast.info {
+  background: var(--sage-800);
+  color: white;
+}
+
+.toast.warning {
+  background: #92400e;
+  color: white;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(0.96); }
+}
+
+/* ===================================================================
+   RESPONSIVE
+   =================================================================== */
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+    gap: 1.5rem;
+  }
+  .sidebar {
+    position: static;
+  }
+  .header-inner {
+    padding: 1rem 1.25rem;
+  }
+  .referral-details {
+    grid-template-columns: 1fr;
+  }
+  .wizard-stepper {
+    gap: 0;
+  }
+  .stepper-label {
+    font-size: 0.6rem;
+  }
+  .step-card-top {
+    padding: 1.25rem 1.25rem 1rem;
+  }
+  .step-body {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-text h1 { font-size: 1.1rem; }
+  .main { padding: 1rem; }
+  .card-body { padding: 1rem; }
+  .wizard-overlay { padding: 1.5rem 1rem 3rem; }
+  .wizard-header h2 { font-size: 1.4rem; }
+  .stepper-circle { width: 32px; height: 32px; font-size: 0.7rem; }
+  .stepper-label { font-size: 0.55rem; }
+  .stepper-line { top: 16px; }
+}
+
+/* ===================================================================
+   HIGHLIGHT FLASH (for real-time updates)
+   =================================================================== */
+@keyframes highlight-flash {
+  0% { background: rgba(10,157,132,0.12); }
+  100% { background: transparent; }
+}
+
+.flash-new {
+  animation: highlight-flash 2s ease-out;
+}
+
+/* Hide dashboard when not active */
+.dashboard-wrap {
+  display: none;
+}
+.dashboard-wrap.visible {
+  display: contents;
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     HEADER
+     ================================================================ -->
+<header class="header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="header-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+      </div>
+      <div class="header-text">
+        <h1>My Health Portal</h1>
+        <div class="header-greeting" id="header-greeting">Good morning, Alice</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="connection-badge">
+        <div class="connection-dot" id="connection-dot"></div>
+        <span id="connection-text">Live</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================================================================
+     ONBOARDING WIZARD
+     ================================================================ -->
+<div class="wizard-overlay" id="wizard-overlay">
+  <div class="wizard-container">
+    <div class="wizard-header">
+      <h2>Secure Account Setup</h2>
+      <p>We'll verify your identity and set up real-time notifications for your health encounters.</p>
+    </div>
+
+    <!-- Stepper -->
+    <div class="wizard-stepper" id="wizard-stepper">
+      <div class="stepper-step active" data-step="1">
+        <div class="stepper-circle">1</div>
+        <div class="stepper-label">Identity</div>
+        <div class="stepper-line"></div>
+      </div>
+      <div class="stepper-step" data-step="2">
+        <div class="stepper-circle">2</div>
+        <div class="stepper-label">Link Records</div>
+        <div class="stepper-line"></div>
+      </div>
+      <div class="stepper-step" data-step="3">
+        <div class="stepper-circle">3</div>
+        <div class="stepper-label">Authorize</div>
+        <div class="stepper-line"></div>
+      </div>
+      <div class="stepper-step" data-step="4">
+        <div class="stepper-circle">4</div>
+        <div class="stepper-label">Subscribe</div>
+        <div class="stepper-line"></div>
+      </div>
+      <div class="stepper-step" data-step="5">
+        <div class="stepper-circle">5</div>
+        <div class="stepper-label">Sharing</div>
+      </div>
+    </div>
+
+    <!-- Step 1: IAL2 Identity Verification -->
+    <div class="wizard-step active" id="wiz-step-1">
+      <div class="step-card">
+        <div class="step-card-top">
+          <div class="step-icon identity">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="step-text">
+            <h3>IAL2 Identity Verification</h3>
+            <p>In production, NIST Identity Assurance Level 2 requires document scanning, facial matching, and address verification. For this demo, we simulate the verification process.</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="step-field">
+            <span class="step-field-label">Full Name</span>
+            <div class="step-field-value">Alice M Rodriguez</div>
+          </div>
+          <div class="step-field">
+            <span class="step-field-label">Date of Birth</span>
+            <div class="step-field-value">April 12, 1987</div>
+          </div>
+          <div class="step-loading" id="wiz-loading-1">
+            <div class="step-spinner"></div>
+            <span class="step-loading-text">Verifying identity...</span>
+          </div>
+          <div class="step-success" id="wiz-success-1">
+            <div class="step-success-header">
+              <div class="step-success-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <span class="step-success-title">Identity Verified</span>
+            </div>
+            <div class="step-success-detail">IAL2 proofing complete. Your identity has been verified at the required assurance level for healthcare data access.</div>
+          </div>
+          <div class="step-actions" id="wiz-actions-1">
+            <button class="step-btn step-btn-primary" onclick="wizardAction(1)">Verify Identity</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Network Registration -->
+    <div class="wizard-step" id="wiz-step-2">
+      <div class="step-card">
+        <div class="step-card-top">
+          <div class="step-icon network">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          </div>
+          <div class="step-text">
+            <h3>Link Health Records</h3>
+            <p>Link your identity across your health data sources so encounter notifications can be delivered to you.</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="step-loading" id="wiz-loading-2">
+            <div class="step-spinner"></div>
+            <span class="step-loading-text">Linking health records...</span>
+          </div>
+          <div class="step-success" id="wiz-success-2">
+            <div class="step-success-header">
+              <div class="step-success-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <span class="step-success-title">Records Linked</span>
+            </div>
+            <div class="step-success-detail" id="wiz-detail-2">
+              Broker ID: <code>--</code><br>
+              Source ID: <code>--</code>
+            </div>
+          </div>
+          <div class="step-actions" id="wiz-actions-2">
+            <button class="step-btn step-btn-primary" onclick="wizardAction(2)">Link Records</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Authorization -->
+    <div class="wizard-step" id="wiz-step-3">
+      <div class="step-card">
+        <div class="step-card-top">
+          <div class="step-icon auth">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="step-text">
+            <h3>Authorize Access</h3>
+            <p>Grant this portal permission to receive encounter notifications on your behalf.</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="step-loading" id="wiz-loading-3">
+            <div class="step-spinner"></div>
+            <span class="step-loading-text">Authorizing...</span>
+          </div>
+          <div class="step-success" id="wiz-success-3">
+            <div class="step-success-header">
+              <div class="step-success-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <span class="step-success-title">Authorized</span>
+            </div>
+            <div class="step-success-detail" id="wiz-detail-3">
+              Access token issued. Expires in 3600 seconds.
+            </div>
+          </div>
+          <div class="step-actions" id="wiz-actions-3">
+            <button class="step-btn step-btn-primary" onclick="wizardAction(3)">Authorize</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Subscribe -->
+    <div class="wizard-step" id="wiz-step-4">
+      <div class="step-card">
+        <div class="step-card-top">
+          <div class="step-icon subscribe">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="step-text">
+            <h3>Enable Notifications</h3>
+            <p>Subscribe to receive real-time alerts when encounters are recorded at any participating provider.</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <div class="step-loading" id="wiz-loading-4">
+            <div class="step-spinner"></div>
+            <span class="step-loading-text">Setting up notifications...</span>
+          </div>
+          <div class="step-success" id="wiz-success-4">
+            <div class="step-success-header">
+              <div class="step-success-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <span class="step-success-title">Subscribed</span>
+            </div>
+            <div class="step-success-detail" id="wiz-detail-4">
+              Subscription ID: <code>--</code><br>
+              Webhook: <code>http://localhost:4000/notifications</code>
+            </div>
+          </div>
+          <div class="step-actions" id="wiz-actions-4">
+            <button class="step-btn step-btn-primary" onclick="wizardAction(4)">Enable Notifications</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Sharing Preferences -->
+    <div class="wizard-step" id="wiz-step-5">
+      <div class="step-card">
+        <div class="step-card-top">
+          <div class="step-icon sharing">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          </div>
+          <div class="step-text">
+            <h3>Sharing Preferences</h3>
+            <p>Optionally share encounter updates with your referring physician. You can change this anytime from your dashboard.</p>
+          </div>
+        </div>
+        <div class="step-body">
+          <label class="wiz-sharing-toggle" id="wiz-sharing-toggle" onclick="toggleWizSharing()">
+            <input type="checkbox" class="wiz-checkbox" id="wiz-sharing-checkbox">
+            <div class="wiz-sharing-text">
+              <h4>Share encounter updates with Dr. Robert Smith</h4>
+              <p>Your referring physician will be notified when encounters occur, based on your chosen sharing level below.</p>
+            </div>
+          </label>
+
+          <div class="wiz-sharing-modes" id="wiz-sharing-modes">
+            <label class="wiz-mode-option active" data-mode="referrals-only" onclick="selectWizMode(this)">
+              <input type="radio" name="wiz-sharing-mode" value="referrals-only" checked>
+              <span class="wiz-mode-label">Referral updates only (recommended)</span>
+            </label>
+            <label class="wiz-mode-option" data-mode="all-encounters" onclick="selectWizMode(this)">
+              <input type="radio" name="wiz-sharing-mode" value="all-encounters">
+              <span class="wiz-mode-label">All encounter updates</span>
+            </label>
+          </div>
+
+          <div class="step-actions" id="wiz-actions-5">
+            <button class="step-btn step-btn-primary" onclick="wizardAction(5)">Complete Setup</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================================================================
+     DASHBOARD (hidden during onboarding)
+     ================================================================ -->
+<div class="dashboard-wrap" id="dashboard-wrap">
+
+<main class="main">
+  <div class="main-content">
+
+    <!-- ============================================================
+         MY REFERRALS
+         ============================================================ -->
+    <section class="card referrals-card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <span class="card-title">My Referrals</span>
+        </div>
+        <span class="referral-count" id="referral-count">0 active</span>
+      </div>
+      <div class="card-body">
+        <div id="referral-list" class="referral-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3>No referrals yet</h3>
+            <p>When your doctor creates a referral, it will appear here with real-time status updates.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         MY ENCOUNTERS
+         ============================================================ -->
+    <section class="card encounters-card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <span class="card-title">My Encounters</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="encounter-list" class="encounter-list">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h3>No encounters recorded</h3>
+            <p>Visits to your healthcare providers will appear here as they happen.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ==============================================================
+       SIDEBAR: NOTIFICATION FEED
+       ============================================================== -->
+  <aside class="sidebar">
+    <section class="card notifications-card">
+      <div class="card-header">
+        <div class="card-header-left">
+          <div class="card-icon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <span class="card-title">Live Feed</span>
+        </div>
+      </div>
+      <div class="notification-list" id="notification-list">
+        <div class="empty-state" id="notification-empty">
+          <div class="empty-state-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <h3>Listening for updates</h3>
+          <p>Real-time events from your providers will stream here.</p>
+        </div>
+      </div>
+    </section>
+  </aside>
+</main>
+
+</div><!-- /dashboard-wrap -->
+
+<!-- Toast container for popup messages -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ================================================================
+     APPLICATION SCRIPT
+     ================================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ---------------------------------------------------------------
+  // Config
+  // ---------------------------------------------------------------
+  var PATIENT_ID = 'patient-001';
+  var PHYSICIAN_REF = 'Practitioner/dr-smith';
+  var BASE = '';  // same origin
+  var PATIENT_NAME = 'Alice M Rodriguez';
+  var PATIENT_DOB = '1987-04-12';
+
+  // ---------------------------------------------------------------
+  // State
+  // ---------------------------------------------------------------
+  var currentSharing = 'referrals-only';
+  var referrals = [];
+  var encounters = [];
+  var notifications = [];
+  var eventSource = null;
+  var wizardCurrentStep = 1;
+  var wizardData = {};
+
+  // ---------------------------------------------------------------
+  // Init
+  // ---------------------------------------------------------------
+  document.addEventListener('DOMContentLoaded', init);
+
+  async function init() {
+    setGreeting();
+    // Check onboarding status — if complete, show dashboard directly
+    try {
+      var res = await fetch(BASE + '/patient/onboarding-status?patientId=' + PATIENT_ID);
+      if (res.ok) {
+        var state = await res.json();
+        if (state.step === 'complete') {
+          showDashboard();
+          return;
+        }
+        // Resume at whatever step the server says
+        if (typeof state.step === 'number' && state.step > 1) {
+          wizardData = state;
+          goToWizardStep(state.step);
+        }
+      }
+    } catch (e) {
+      console.log('Could not check onboarding status, showing wizard');
+    }
+  }
+
+  function showDashboard() {
+    var wizard = document.getElementById('wizard-overlay');
+    var dashboard = document.getElementById('dashboard-wrap');
+    wizard.classList.add('hidden');
+    dashboard.classList.add('visible', 'entering');
+    // Init dashboard data
+    loadSharingPreference();
+    loadReferrals();
+    loadEncounters();
+    connectSSE();
+  }
+
+  // ---------------------------------------------------------------
+  // Greeting
+  // ---------------------------------------------------------------
+  function setGreeting() {
+    var hour = new Date().getHours();
+    var greeting;
+    if (hour < 12) greeting = 'Good morning';
+    else if (hour < 17) greeting = 'Good afternoon';
+    else greeting = 'Good evening';
+
+    document.getElementById('header-greeting').textContent = greeting + ', Alice';
+  }
+
+  // ---------------------------------------------------------------
+  // Wizard Logic
+  // ---------------------------------------------------------------
+  function goToWizardStep(step) {
+    wizardCurrentStep = step;
+    // Update stepper UI
+    var steps = document.querySelectorAll('.stepper-step');
+    steps.forEach(function(s) {
+      var n = parseInt(s.getAttribute('data-step'));
+      s.classList.remove('active', 'completed');
+      if (n < step) s.classList.add('completed');
+      else if (n === step) s.classList.add('active');
+    });
+    // Update step content
+    for (var i = 1; i <= 5; i++) {
+      var el = document.getElementById('wiz-step-' + i);
+      if (el) {
+        el.classList.remove('active');
+        if (i === step) el.classList.add('active');
+      }
+    }
+  }
+
+  window.wizardAction = async function(step) {
+    var btn = document.querySelector('#wiz-actions-' + step + ' .step-btn-primary');
+    var loading = document.getElementById('wiz-loading-' + step);
+    var success = document.getElementById('wiz-success-' + step);
+    var actions = document.getElementById('wiz-actions-' + step);
+
+    if (btn) btn.disabled = true;
+    if (loading) loading.classList.add('active');
+
+    try {
+      var result;
+      if (step === 1) {
+        result = await postJson('/patient/verify-identity', {
+          patientId: PATIENT_ID, name: PATIENT_NAME, birthDate: PATIENT_DOB
+        });
+      } else if (step === 2) {
+        result = await postJson('/patient/register', {
+          patientId: PATIENT_ID, name: PATIENT_NAME, birthDate: PATIENT_DOB
+        });
+        if (result.brokerId) {
+          wizardData.brokerId = result.brokerId;
+          wizardData.sourceId = result.sourceId;
+          document.getElementById('wiz-detail-2').innerHTML =
+            'Broker ID: <code>' + escapeHtml(result.brokerId) + '</code><br>' +
+            'Source ID: <code>' + escapeHtml(result.sourceId) + '</code>';
+        }
+      } else if (step === 3) {
+        result = await postJson('/patient/authorize', {
+          patientId: PATIENT_ID, name: PATIENT_NAME, birthDate: PATIENT_DOB
+        });
+        if (result.accessToken) {
+          wizardData.accessToken = result.accessToken;
+          var tokenPreview = result.accessToken.length > 30
+            ? result.accessToken.substring(0, 30) + '...'
+            : result.accessToken;
+          document.getElementById('wiz-detail-3').innerHTML =
+            'Access token issued. Expires in 3600 seconds.<br>' +
+            'Token: <code>' + escapeHtml(tokenPreview) + '</code>';
+        }
+      } else if (step === 4) {
+        result = await postJson('/patient/subscribe', { patientId: PATIENT_ID });
+        if (result.subscriptionId) {
+          wizardData.subscriptionId = result.subscriptionId;
+          document.getElementById('wiz-detail-4').innerHTML =
+            'Subscription ID: <code>' + escapeHtml(result.subscriptionId) + '</code><br>' +
+            'Webhook: <code>http://localhost:4000/notifications</code>';
+        }
+      } else if (step === 5) {
+        var sharingEnabled = document.getElementById('wiz-sharing-checkbox').checked;
+        var sharingMode = 'referrals-only';
+        if (sharingEnabled) {
+          var checked = document.querySelector('input[name="wiz-sharing-mode"]:checked');
+          if (checked) sharingMode = checked.value;
+        }
+        result = await postJson('/patient/complete-onboarding', {
+          patientId: PATIENT_ID,
+          sharingEnabled: sharingEnabled,
+          sharingMode: sharingMode,
+          physicianRef: PHYSICIAN_REF,
+        });
+        // Transition to dashboard
+        if (loading) loading.classList.remove('active');
+        var wizard = document.getElementById('wizard-overlay');
+        wizard.style.animation = 'wizard-exit 0.4s ease-in forwards';
+        setTimeout(function() {
+          showDashboard();
+        }, 400);
+        return;
+      }
+
+      if (result && result.error) {
+        throw new Error(result.error);
+      }
+
+      // Show success
+      if (loading) loading.classList.remove('active');
+      if (success) success.classList.add('active');
+      // Auto-advance after 800ms instead of showing a Continue button
+      setTimeout(function() { advanceWizard(step); }, 800);
+    } catch (e) {
+      if (loading) loading.classList.remove('active');
+      if (btn) btn.disabled = false;
+      showToast('Step failed: ' + e.message, 'warning');
+    }
+  };
+
+  window.advanceWizard = function(fromStep) {
+    goToWizardStep(fromStep + 1);
+  };
+
+  window.toggleWizSharing = function() {
+    var cb = document.getElementById('wiz-sharing-checkbox');
+    var toggle = document.getElementById('wiz-sharing-toggle');
+    var modes = document.getElementById('wiz-sharing-modes');
+    // The label click toggles the checkbox automatically
+    setTimeout(function() {
+      if (cb.checked) {
+        toggle.classList.add('active');
+        modes.classList.add('visible');
+      } else {
+        toggle.classList.remove('active');
+        modes.classList.remove('visible');
+      }
+    }, 10);
+  };
+
+  window.selectWizMode = function(el) {
+    document.querySelectorAll('.wiz-mode-option').forEach(function(opt) {
+      opt.classList.remove('active');
+    });
+    el.classList.add('active');
+    el.querySelector('input[type="radio"]').checked = true;
+  };
+
+  async function postJson(path, body) {
+    var res = await fetch(BASE + path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    return res.json();
+  }
+
+  // ---------------------------------------------------------------
+  // Sharing Preferences
+  // ---------------------------------------------------------------
+  async function loadSharingPreference() {
+    try {
+      var res = await fetch(BASE + '/patient/sharing?patientId=' + PATIENT_ID + '&physicianRef=' + encodeURIComponent(PHYSICIAN_REF));
+      if (!res.ok) return;
+      var data = await res.json();
+      if (data.mode && data.active) {
+        currentSharing = data.mode;
+      }
+    } catch (e) {
+      console.error('Failed to load sharing preference:', e);
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Referrals
+  // ---------------------------------------------------------------
+  async function loadReferrals() {
+    try {
+      var res = await fetch(BASE + '/patient/referrals?patientId=' + PATIENT_ID);
+      if (!res.ok) return;
+      referrals = await res.json();
+      renderReferrals();
+    } catch (e) {
+      console.error('Failed to load referrals:', e);
+    }
+  }
+
+  function mapBusinessStatus(businessStatusCode, taskStatus) {
+    if (!businessStatusCode && taskStatus) {
+      // Fallback mapping from task.status
+      switch (taskStatus) {
+        case 'requested': case 'received': case 'accepted': return { label: 'PENDING', cls: 'pending' };
+        case 'in-progress': return { label: 'IN PROGRESS', cls: 'in-progress' };
+        case 'completed': return { label: 'COMPLETED', cls: 'completed' };
+        case 'failed': case 'cancelled': return { label: 'OVERDUE', cls: 'overdue' };
+        default: return { label: 'PENDING', cls: 'pending' };
+      }
+    }
+    switch (businessStatusCode) {
+      case 'awaiting-scheduling': return { label: 'PENDING', cls: 'pending' };
+      case 'appointment-scheduled': return { label: 'SCHEDULED', cls: 'scheduled' };
+      case 'encounter-in-progress': return { label: 'IN PROGRESS', cls: 'in-progress' };
+      case 'encounter-completed':
+      case 'loop-closed': return { label: 'COMPLETED', cls: 'completed' };
+      case 'overdue': return { label: 'OVERDUE', cls: 'overdue' };
+      default: return { label: 'PENDING', cls: 'pending' };
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '--';
+    try {
+      var d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  function formatDateTime(dateStr) {
+    if (!dateStr) return '--';
+    try {
+      var d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+        ' at ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    } catch (e) {
+      return dateStr;
+    }
+  }
+
+  function renderReferrals() {
+    var container = document.getElementById('referral-list');
+    var countEl = document.getElementById('referral-count');
+
+    if (!referrals || referrals.length === 0) {
+      container.innerHTML = '<div class="empty-state">' +
+        '<div class="empty-state-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>' +
+        '<h3>No referrals yet</h3>' +
+        '<p>When your doctor creates a referral, it will appear here with real-time status updates.</p></div>';
+      countEl.textContent = '0 active';
+      return;
+    }
+
+    var activeCount = referrals.filter(function(r) {
+      var bs = r.task && r.task.businessStatus && r.task.businessStatus.coding && r.task.businessStatus.coding[0]
+        ? r.task.businessStatus.coding[0].code : null;
+      var s = mapBusinessStatus(bs, r.task ? r.task.status : null);
+      return s.cls !== 'completed';
+    }).length;
+
+    countEl.textContent = activeCount + ' active';
+
+    var html = '';
+    referrals.forEach(function(ref, i) {
+      var sr = ref.serviceRequest;
+      var task = ref.task;
+
+      var reason = '--';
+      if (sr.reasonCode && sr.reasonCode[0] && sr.reasonCode[0].coding && sr.reasonCode[0].coding[0]) {
+        reason = sr.reasonCode[0].coding[0].display || sr.reasonCode[0].text || '--';
+      } else if (sr.reasonCode && sr.reasonCode[0] && sr.reasonCode[0].text) {
+        reason = sr.reasonCode[0].text;
+      }
+
+      var codeText = sr.code && sr.code.text ? sr.code.text : '';
+      var referredTo = sr.performer && sr.performer[0] ? sr.performer[0].display || '--' : '--';
+      var requester = sr.requester ? sr.requester.display || '--' : '--';
+      var date = formatDate(sr.authoredOn);
+
+      var businessCode = task && task.businessStatus && task.businessStatus.coding && task.businessStatus.coding[0]
+        ? task.businessStatus.coding[0].code : null;
+      var status = mapBusinessStatus(businessCode, task ? task.status : null);
+      var lastModified = task ? formatDateTime(task.lastModified) : '--';
+
+      html += '<div class="referral-item" style="animation-delay: ' + (i * 0.08) + 's">' +
+        '<div class="referral-top">' +
+          '<div class="referral-reason">' + escapeHtml(reason) + '</div>' +
+          '<span class="status-badge ' + status.cls + '"><span class="status-badge-dot"></span>' + status.label + '</span>' +
+        '</div>' +
+        '<div class="referral-details">' +
+          '<div class="referral-detail">' +
+            '<span class="referral-detail-label">Referred To</span>' +
+            '<span class="referral-detail-value">' + escapeHtml(referredTo) + '</span>' +
+          '</div>' +
+          '<div class="referral-detail">' +
+            '<span class="referral-detail-label">Referred By</span>' +
+            '<span class="referral-detail-value">' + escapeHtml(requester) + '</span>' +
+          '</div>' +
+          '<div class="referral-detail">' +
+            '<span class="referral-detail-label">Date</span>' +
+            '<span class="referral-detail-value">' + date + '</span>' +
+          '</div>' +
+          '<div class="referral-detail">' +
+            '<span class="referral-detail-label">Last Updated</span>' +
+            '<span class="referral-detail-value">' + lastModified + '</span>' +
+          '</div>' +
+          (codeText ? '<div class="referral-detail" style="grid-column: 1 / -1;">' +
+            '<span class="referral-detail-label">Type</span>' +
+            '<span class="referral-detail-value">' + escapeHtml(codeText) + '</span>' +
+          '</div>' : '') +
+        '</div>' +
+      '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------------
+  // Encounters
+  // ---------------------------------------------------------------
+  async function loadEncounters() {
+    try {
+      var res = await fetch(BASE + '/patient/encounters?patientId=' + PATIENT_ID);
+      if (!res.ok) return;
+      encounters = await res.json();
+      renderEncounters();
+    } catch (e) {
+      console.error('Failed to load encounters:', e);
+    }
+  }
+
+  function mapEncounterClass(classCode) {
+    switch (classCode) {
+      case 'AMB': return 'Outpatient';
+      case 'EMER': return 'Emergency';
+      case 'IMP': return 'Inpatient';
+      case 'SS': return 'Short Stay';
+      case 'OBSENC': return 'Observation';
+      case 'VR': return 'Virtual';
+      default: return classCode || 'Visit';
+    }
+  }
+
+  function mapEncounterStatus(status) {
+    switch (status) {
+      case 'planned': return 'Planned';
+      case 'arrived': return 'Arrived';
+      case 'triaged': return 'Triaged';
+      case 'in-progress': return 'In Progress';
+      case 'onleave': return 'On Leave';
+      case 'finished': return 'Completed';
+      case 'cancelled': return 'Cancelled';
+      default: return status || '--';
+    }
+  }
+
+  function renderEncounters() {
+    var container = document.getElementById('encounter-list');
+
+    if (!encounters || encounters.length === 0) {
+      container.innerHTML = '<div class="empty-state">' +
+        '<div class="empty-state-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>' +
+        '<h3>No encounters recorded</h3>' +
+        '<p>Visits to your healthcare providers will appear here as they happen.</p></div>';
+      return;
+    }
+
+    // Sort most recent first
+    var sorted = encounters.slice().sort(function(a, b) {
+      var da = a.period && a.period.start ? new Date(a.period.start) : new Date(0);
+      var db = b.period && b.period.start ? new Date(b.period.start) : new Date(0);
+      return db - da;
+    });
+
+    var html = '';
+    sorted.forEach(function(enc, i) {
+      var provider = enc.serviceProvider ? enc.serviceProvider.display || '--' : '--';
+      var date = enc.period && enc.period.start ? formatDate(enc.period.start) : '--';
+      var type = enc.type && enc.type[0] ? enc.type[0].text || mapEncounterClass(enc.class && enc.class.code) : mapEncounterClass(enc.class && enc.class.code);
+      var status = mapEncounterStatus(enc.status);
+      var physician = enc.participant && enc.participant[0] && enc.participant[0].individual
+        ? enc.participant[0].individual.display : null;
+      var shared = enc._shared === true;
+
+      html += '<div class="encounter-item" style="animation-delay: ' + (i * 0.06) + 's">' +
+        '<div class="encounter-dot ' + (shared ? 'shared' : '') + '"></div>' +
+        '<div class="encounter-content">' +
+          '<div class="encounter-top-row">' +
+            '<span class="encounter-provider">' + escapeHtml(provider) + '</span>' +
+            '<span class="encounter-sharing-badge ' + (shared ? 'shared' : 'private') + '">' +
+              (shared
+                ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Shared with Dr. Smith'
+                : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Private') +
+            '</span>' +
+          '</div>' +
+          '<div class="encounter-meta">' +
+            '<span>' + date + '</span>' +
+            '<span>' + escapeHtml(type) + '</span>' +
+            '<span>' + escapeHtml(status) + '</span>' +
+            (physician ? '<span>' + escapeHtml(physician) + '</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ---------------------------------------------------------------
+  // SSE Real-time Events
+  // ---------------------------------------------------------------
+  function connectSSE() {
+    if (eventSource) {
+      eventSource.close();
+    }
+
+    eventSource = new EventSource(BASE + '/patient/events?patientId=' + PATIENT_ID);
+
+    eventSource.onopen = function() {
+      setConnectionState(true);
+    };
+
+    eventSource.onmessage = function(event) {
+      try {
+        var data = JSON.parse(event.data);
+        handleSSEEvent(data);
+      } catch (e) {
+        console.warn('SSE parse error:', e);
+      }
+    };
+
+    eventSource.onerror = function() {
+      setConnectionState(false);
+      // EventSource auto-reconnects, but let's ensure UI reflects state
+      setTimeout(function() {
+        if (eventSource && eventSource.readyState === EventSource.OPEN) {
+          setConnectionState(true);
+        }
+      }, 3000);
+    };
+  }
+
+  function setConnectionState(connected) {
+    var dot = document.getElementById('connection-dot');
+    var text = document.getElementById('connection-text');
+    if (connected) {
+      dot.className = 'connection-dot';
+      text.textContent = 'Live';
+    } else {
+      dot.className = 'connection-dot disconnected';
+      text.textContent = 'Reconnecting';
+    }
+  }
+
+  function handleSSEEvent(data) {
+    if (data.type === 'connected') {
+      setConnectionState(true);
+      return;
+    }
+
+    // Add to notifications
+    addNotification(data);
+
+    // Refresh relevant sections — always reload both encounters and referrals
+    // because encounter events may trigger task status changes via the matching engine
+    if (data.type === 'encounter-stored') {
+      loadEncounters();
+      loadReferrals();
+      var enc = data.encounter || {};
+      var provider = enc.serviceProvider ? enc.serviceProvider.display : 'a provider';
+      showToast('New encounter recorded at ' + provider + '.', 'info');
+    }
+
+    if (data.type === 'encounter-updated') {
+      loadEncounters();
+      loadReferrals();
+      var enc2 = data.encounter || {};
+      var statusText = enc2.status || 'updated';
+      showToast('Encounter status changed to ' + statusText + '.', 'info');
+    }
+
+    if (data.type === 'task-updated') {
+      loadReferrals();
+      showToast('Referral status updated.', 'info');
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Notifications
+  // ---------------------------------------------------------------
+  function addNotification(data) {
+    notifications.unshift(data);
+    // Keep max 50
+    if (notifications.length > 50) notifications.length = 50;
+    renderNotification(data);
+  }
+
+  function renderNotification(data) {
+    var container = document.getElementById('notification-list');
+    var empty = document.getElementById('notification-empty');
+    if (empty) empty.remove();
+
+    var typeClass = 'type-' + (data.type || 'unknown').replace(/_/g, '-');
+    var time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+    var text = describeEvent(data);
+    var typeLabel = formatEventType(data.type);
+
+    var div = document.createElement('div');
+    div.className = 'notification-item ' + typeClass;
+    div.innerHTML = '<div class="notification-time">' + time + '</div>' +
+      '<div class="notification-text">' + escapeHtml(text) + '</div>' +
+      '<span class="notification-type-tag">' + escapeHtml(typeLabel) + '</span>';
+
+    container.insertBefore(div, container.firstChild);
+
+    // Limit displayed
+    while (container.children.length > 30) {
+      container.removeChild(container.lastChild);
+    }
+  }
+
+  function describeEvent(data) {
+    var d = data.data || data;
+    switch (data.type) {
+      case 'encounter-stored':
+        return 'New encounter recorded' +
+          (d.serviceProvider ? ' at ' + (d.serviceProvider.display || d.serviceProvider) : '') +
+          (d.status ? ' (status: ' + d.status + ')' : '') + '.';
+      case 'encounter-updated':
+        var enc = d.encounter || d;
+        return 'Encounter' +
+          (d.encounterId ? ' ' + d.encounterId : '') +
+          ' updated to ' + (enc.status || 'unknown') + '.';
+      case 'encounter-routed':
+        return 'Encounter' +
+          (d.encounterId ? ' ' + d.encounterId : '') +
+          ' has been routed to Dr. Smith' +
+          (d.matchScore ? ' (match score: ' + d.matchScore + ')' : '') + '.';
+      case 'task-updated':
+        return 'Referral task' +
+          (d.taskId ? ' ' + d.taskId : '') +
+          ' status changed' +
+          (d.newStatus ? ' to "' + d.newStatus + '"' : '') +
+          (d.businessStatus ? ' (' + d.businessStatus + ')' : '') + '.';
+      default:
+        return 'Event received: ' + (data.type || 'unknown');
+    }
+  }
+
+  function formatEventType(type) {
+    if (!type) return 'Event';
+    return type.replace(/-/g, ' ').replace(/_/g, ' ');
+  }
+
+  // ---------------------------------------------------------------
+  // Toast Messages
+  // ---------------------------------------------------------------
+  function showToast(message, type) {
+    var container = document.getElementById('toast-container');
+    var toast = document.createElement('div');
+    toast.className = 'toast ' + (type || 'info');
+    toast.textContent = message;
+    container.appendChild(toast);
+
+    // Remove after animation
+    setTimeout(function() {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 4200);
+  }
+
+  // ---------------------------------------------------------------
+  // Utilities
+  // ---------------------------------------------------------------
+  function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+})();
+</script>
+</body>
+</html>
