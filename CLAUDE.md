@@ -158,15 +158,15 @@ Each step validates the previous step completed. The wizard state is stored in `
 - **`makeEncounter()`** needs both `serviceProviderRef` and `serviceProviderDisplay` for matching engine NPI + name matching to work
 - **`seedDemoReferral()`** is separate from `seedDemoData()` — tests create their own referrals with specific IDs for assertions
 
-## The Upstream Broker
+## The Broker (vendored)
 
-Git submodule at `cms-fhir-subscriptions-broker/` ([upstream](https://github.com/jmandel/cms-fhir-subscriptions-broker)).
+Vendored at `cms-fhir-subscriptions-broker/` (originally from [jmandel/cms-fhir-subscriptions-broker](https://github.com/jmandel/cms-fhir-subscriptions-broker), with local modifications).
 
 - Must run with `ROUTING_MODE=path` for this app to communicate via path-based URLs
 - Three services: `/client/` (IAS Client), `/broker/` (Subscriptions Broker), `/mercy-ehr/` (simulated EHR)
 - All inter-service communication happens over HTTP (no in-process wiring)
 - The EHR always sets `serviceProvider` to "Mercy General Hospital" — encounters arrive with the EHR's real data
-- Two additions made to the upstream EHR for this demo: `/trigger-event` endpoint and encounter update-by-ID support
+- **Local modifications**: admin reset endpoints, custom subscription endpoint delivery, encounter update-by-ID support, practitioner NPI/display fields in EncounterOptions
 
 ## Seed Data (from `shared/seed.ts`)
 
