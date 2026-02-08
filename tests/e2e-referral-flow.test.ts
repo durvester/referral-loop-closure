@@ -17,8 +17,8 @@ import { processEncounter } from "../portal/routing";
 import type { Encounter } from "../fhir/types";
 
 // ---------------------------------------------------------------------------
-// Helper: create an encounter that mimics what Josh's EHR actually produces.
-// Josh's EHR always sets serviceProvider to "Mercy General Hospital" with
+// Helper: create an encounter that mimics what the upstream EHR actually produces.
+// The upstream EHR always sets serviceProvider to "Mercy General Hospital" with
 // reference "Organization/mercy-hospital", and uses EHR-local patient IDs.
 // Optionally includes a practitioner with embedded NPI identifier.
 // ---------------------------------------------------------------------------
@@ -51,7 +51,7 @@ function makeEhrEncounter(overrides: {
       }]
     : undefined;
 
-  // This mirrors the shape of encounters from Josh's EHR (shared/types.ts:44-93)
+  // This mirrors the shape of encounters from the upstream EHR (shared/types.ts:44-93)
   return {
     resourceType: "Encounter",
     id,
@@ -76,7 +76,7 @@ function makeEhrEncounter(overrides: {
     subject: { reference: `Patient/${patientId}` },
     participant,
     period: { start: new Date().toISOString() },
-    // Josh's EHR hardcodes this — we don't override it
+    // The upstream EHR hardcodes this — we don't override it
     serviceProvider: {
       reference: "Organization/mercy-hospital",
       display: "Mercy General Hospital",
@@ -129,7 +129,7 @@ function seedReferralAndTask() {
 // ---------------------------------------------------------------------------
 
 describe("end-to-end referral flow", () => {
-  const EHR_PATIENT_ID = "mercy-abc123"; // simulates Josh's EHR patient ID
+  const EHR_PATIENT_ID = "mercy-abc123"; // simulates the upstream EHR patient ID
 
   beforeEach(() => {
     clearAllStores();
@@ -261,7 +261,7 @@ describe("end-to-end referral flow", () => {
     const stored = encounters.get("enc-ehr-stored")!;
     // Subject reference should be normalized to our patient ID
     expect(stored.subject?.reference).toBe("Patient/patient-001");
-    // ServiceProvider should remain unchanged (from Josh's EHR)
+    // ServiceProvider should remain unchanged (from the upstream EHR)
     expect(stored.serviceProvider?.display).toBe("Mercy General Hospital");
   });
 

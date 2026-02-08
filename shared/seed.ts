@@ -22,8 +22,8 @@ export function seedDemoData(): void {
   });
   practitioners.set(drSmith.id, drSmith);
 
-  // --- Provider A: Mercy General Hospital (Josh's EHR data source) ---
-  // This org ID MUST match Josh's EHR serviceProvider.reference ("Organization/mercy-hospital").
+  // --- Provider A: Mercy General Hospital (upstream EHR data source) ---
+  // This org ID MUST match the upstream EHR's serviceProvider.reference ("Organization/mercy-hospital").
   // Registering it in our store enables NPI-based matching when encounters arrive from the broker.
   const orgMercy = makeOrganization({
     id: "mercy-hospital",
@@ -37,7 +37,7 @@ export function seedDemoData(): void {
   organizations.set(orgMercy.id, orgMercy);
 
   // --- Provider B: Valley Cardiology (second referral, no EHR in broker) ---
-  // This referral will NOT match encounters from Josh's EHR because Valley Cardiology
+  // This referral will NOT match encounters from the upstream EHR because Valley Cardiology
   // is not a data source — demonstrating the matching filter works correctly.
   const orgValley = makeOrganization({
     id: "org-valley-cardiology",

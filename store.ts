@@ -64,7 +64,7 @@ export const sseClients: SSEClient[] = [];
 
 // Helper: resolve EHR patient ID to our internal patient ID via brokerSessions.
 // This is the standard HIE patient cross-referencing (MPI) pattern:
-// Josh's EHR assigns its own IDs (e.g., "mercy-a1b2c3d"). When an encounter
+// The upstream EHR assigns its own IDs (e.g., "mercy-a1b2c3d"). When an encounter
 // arrives from the broker, we look up which of our patients has that sourceId
 // and return our canonical patientId.
 export function resolvePatientId(ehrPatientId: string): string {

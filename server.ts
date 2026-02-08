@@ -71,7 +71,7 @@ function landingPageHtml(): string {
 
   <div class="card">
     <h2>Simulate Encounters at Mercy General</h2>
-    <p style="margin-bottom: 0.75rem">These buttons simulate real events at Josh's EHR. The broker delivers notifications to both the Patient Portal and the Physician Dashboard.</p>
+    <p style="margin-bottom: 0.75rem">These buttons simulate real events at the upstream EHR. The broker delivers notifications to both the Patient Portal and the Physician Dashboard.</p>
     <div style="background:#f0fdf4;border:1px solid #dcfce7;border-radius:8px;padding:1rem;margin-bottom:0.75rem">
       <div style="font-weight:700;font-size:0.8rem;color:#15803d;margin-bottom:0.5rem">Referral: Cardiology Consultation for Chest Pain</div>
       <p style="font-size:0.8rem;color:#475569;margin-bottom:0.75rem">Alice's open referral to Mercy General &mdash; Dr. Sarah Johnson, Cardiovascular Disease. These encounters will match the referral and update the tracking task.</p>
@@ -189,7 +189,7 @@ const server = Bun.serve({
       }
       // Notification webhook (from broker)
       // The broker delivers encounter notifications here. We fetch the full
-      // encounter from Josh's EHR, then process it through our matching/routing
+      // encounter from the upstream EHR, then process it through our matching/routing
       // pipeline. Patient ID cross-referencing happens inside processEncounter.
       else if (path === "/notifications" && method === "POST") {
         const bundle = await req.json() as any;
@@ -204,7 +204,7 @@ const server = Bun.serve({
           if (!focusRef) continue;
 
           try {
-            // Fetch full encounter from Josh's EHR
+            // Fetch full encounter from the upstream EHR
             const encounter = await fetchEncounterFromEhr(focusRef);
             console.log(`[notifications] Fetched ${focusRef}: status=${encounter.status}, ` +
               `subject=${encounter.subject?.reference}, ` +
@@ -243,7 +243,7 @@ const server = Bun.serve({
       }
       // API: trigger events for demo
       //
-      // Triggers encounters at Josh's EHR (Mercy General Hospital).
+      // Triggers encounters at the upstream EHR (Mercy General Hospital).
       // The EHR creates the encounter → notifies the broker → broker delivers
       // to our /notifications webhook (using the subscription's channel.endpoint).
       else if (path === "/api/trigger" && method === "POST") {

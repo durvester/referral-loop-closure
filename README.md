@@ -1,10 +1,10 @@
 # Referral Loop Closure POC
 
-A proof-of-concept demonstrating **referral loop closure** using the [FHIR Subscriptions Broker architecture](https://github.com/jmandel/cms-fhir-subscriptions-broker) proposed by [Josh Mandel](https://github.com/jmandel) for the CMS Interoperability Framework (July 2026 deadline).
+A proof-of-concept demonstrating **referral loop closure** using the [FHIR Subscriptions Broker architecture](https://github.com/jmandel/cms-fhir-subscriptions-broker) for the CMS Interoperability Framework (July 2026 deadline).
 
 ## What this does
 
-This application acts as an **Identity-Assured Subscriber (IAS) client** that sits on top of Josh's Subscriptions Broker. It demonstrates a complete referral loop closure workflow:
+This application acts as an **Identity-Assured Subscriber (IAS) client** that sits on top of the Subscriptions Broker. It demonstrates a complete referral loop closure workflow:
 
 1. A PCP (Dr. Smith) creates a referral for a patient (Alice Rodriguez) to a cardiologist (Dr. Johnson) at Mercy General Hospital
 2. Alice onboards through a patient portal with IAL2 identity verification, broker registration, SMART authorisation, and FHIR Subscription creation
@@ -20,12 +20,12 @@ Dr. Smith's Dashboard ←──SSE──┐
 Alice's Portal ←──SSE──── This App (port 4000) ←── webhook ─── Broker (port 3000)
                                │                                      │
                                └── FHIR read ──→ Mercy General EHR ──┘
-                                                   (Josh's demo)
+                                                   (upstream demo)
 ```
 
 **This app** (`referral-loop-closure/`): Patient portal, physician dashboard, matching engine, consent routing, FHIR resource builders, and test suite.
 
-**Josh's Broker** (`cms-fhir-subscriptions-broker/`, [upstream](https://github.com/jmandel/cms-fhir-subscriptions-broker)): Subscriptions Broker, IAS client services, and simulated Mercy General EHR. Included as a git submodule; runs as a separate process.
+**Upstream Broker** (`cms-fhir-subscriptions-broker/`, [upstream](https://github.com/jmandel/cms-fhir-subscriptions-broker)): Subscriptions Broker, IAS client services, and simulated Mercy General EHR. Included as a git submodule; runs as a separate process.
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ git submodule update --init
 ## Running
 
 ```bash
-# Terminal 1: Start Josh's Broker + simulated EHR
+# Terminal 1: Start the Broker + simulated EHR
 cd cms-fhir-subscriptions-broker/demo
 ROUTING_MODE=path bun run server.ts
 
@@ -73,9 +73,9 @@ bun test                      # All tests (122 tests across 8 files)
 bun test tests/e2e-server     # E2E only (needs ports 3000 + 4000 free)
 ```
 
-## Modifications to Josh's implementation
+## Modifications to the upstream EHR
 
-I made two additions to Josh's EHR data source handler to support the demo:
+I made two additions to the upstream EHR data source handler to support the demo:
 
 1. **`/trigger-event` endpoint**: Accepts patient demographics and encounter options to simulate encounter creation at Mercy General with specific practitioner and clinical details
 2. **Encounter update by ID**: Support for updating an existing encounter's status rather than always creating new ones, enabling `planned → in-progress → finished` progression on a single Encounter resource
@@ -102,7 +102,7 @@ These changes are in the companion fork and are not required for the core Broker
 
 ## Acknowledgements
 
-This POC builds directly on [Josh Mandel's](https://github.com/jmandel) FHIR Subscriptions Broker architecture and [demo implementation](https://github.com/jmandel/cms-fhir-subscriptions-broker). The Broker handles patient registration, demographic matching, subscription management, and notification delivery. This application adds referral tracking, encounter matching, consent routing, and provider-facing dashboards on top of that infrastructure.
+This POC builds on the [FHIR Subscriptions Broker](https://github.com/jmandel/cms-fhir-subscriptions-broker) architecture and demo by [Josh Mandel](https://github.com/jmandel). The Broker handles patient registration, demographic matching, subscription management, and notification delivery. This application adds referral tracking, encounter matching, consent routing, and provider-facing dashboards on top of that infrastructure.
 
 ## License
 

@@ -14,8 +14,8 @@ import { processEncounter } from "../portal/routing";
 import type { Encounter } from "../fhir/types";
 
 // ---------------------------------------------------------------------------
-// Helper: create an encounter shaped exactly like Josh's EHR produces them.
-// serviceProvider is always "Mercy General Hospital" (hardcoded in Josh's EHR).
+// Helper: create an encounter shaped exactly like the upstream EHR produces them.
+// serviceProvider is always "Mercy General Hospital" (hardcoded in the upstream EHR).
 // Patient IDs are EHR-local (e.g., "mercy-abc123").
 // Now includes practitioner with embedded NPI identifier.
 // ---------------------------------------------------------------------------
@@ -164,7 +164,7 @@ function seedReferralsAndTasks() {
 //
 // This demonstrates that the matching engine correctly filters encounters
 // against the right referral target, even though all encounters come from
-// the same EHR data source (Josh's single-hospital demo).
+// the same EHR data source (the upstream single-hospital demo).
 // ---------------------------------------------------------------------------
 
 describe("two-referral scenario", () => {

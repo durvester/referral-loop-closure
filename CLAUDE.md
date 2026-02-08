@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A proof-of-concept demonstrating **referral loop closure** using the FHIR Subscriptions Broker architecture proposed by Josh Mandel for the CMS Interoperability Framework (July 4, 2026 deadline). The app is an Identity-Assured Subscriber (IAS) client that onboards patients, creates FHIR Subscriptions at a Broker, receives encounter notifications, matches them to open referrals, and routes updates to referring physicians based on patient consent.
+A proof-of-concept demonstrating **referral loop closure** using the FHIR Subscriptions Broker architecture for the CMS Interoperability Framework (July 4, 2026 deadline). The app is an Identity-Assured Subscriber (IAS) client that onboards patients, creates FHIR Subscriptions at a Broker, receives encounter notifications, matches them to open referrals, and routes updates to referring physicians based on patient consent.
 
 ## Commands
 
@@ -79,7 +79,7 @@ App fetches full Encounter → matching engine scores against open referrals
 
 Confidence: high (>=0.70, auto-link), medium (>=0.40), low (<0.40). Results below 0.10 excluded.
 
-The engine uses `MatchContext` lookup functions to resolve FHIR references to NPI values from the in-memory stores. Encounters from Josh's EHR also carry embedded NPI identifiers on `participant[0].individual.identifier`.
+The engine uses `MatchContext` lookup functions to resolve FHIR references to NPI values from the in-memory stores. Encounters from the upstream EHR also carry embedded NPI identifiers on `participant[0].individual.identifier`.
 
 ### Patient Identity Cross-Referencing
 
@@ -133,7 +133,7 @@ Each step validates the previous step completed. The wizard state is stored in `
 | `/notifications` | POST | Webhook from broker — fetches encounters, runs `processEncounter()` |
 | `/api/seed` | POST | Seeds demo data + referral |
 | `/api/reset` | POST | `clearAllStores()` + resets broker + EHR |
-| `/api/trigger` | POST | Triggers encounters at Josh's EHR (`schedule-appointment`, `start-encounter`, `psychiatrist-visit`) |
+| `/api/trigger` | POST | Triggers encounters at the upstream EHR (`schedule-appointment`, `start-encounter`, `psychiatrist-visit`) |
 
 ## Testing
 
@@ -158,7 +158,7 @@ Each step validates the previous step completed. The wizard state is stored in `
 - **`makeEncounter()`** needs both `serviceProviderRef` and `serviceProviderDisplay` for matching engine NPI + name matching to work
 - **`seedDemoReferral()`** is separate from `seedDemoData()` — tests create their own referrals with specific IDs for assertions
 
-## The Broker (Josh's Code)
+## The Upstream Broker
 
 Git submodule at `cms-fhir-subscriptions-broker/` ([upstream](https://github.com/jmandel/cms-fhir-subscriptions-broker)).
 
@@ -174,7 +174,7 @@ Git submodule at `cms-fhir-subscriptions-broker/` ([upstream](https://github.com
 |--------|-----|-----|-------|
 | Patient Alice Rodriguez | `patient-001` | — | DOB: 1987-04-12 |
 | Dr. Robert Smith (PCP) | `dr-smith` | 1234567890 | Referring physician |
-| Mercy General Hospital | `mercy-hospital` | 1538246790 | Josh's EHR data source |
+| Mercy General Hospital | `mercy-hospital` | 1538246790 | Upstream EHR data source |
 | Valley Cardiology | `org-valley-cardiology` | 1122334455 | Not in broker — tests matching filter |
 | Dr. Sarah Johnson | `dr-johnson` | 9876543210 | Cardiologist |
 | Cardiology role | `role-cardio` | — | Links dr-johnson to Valley Cardiology, specialty 207RC0000X |

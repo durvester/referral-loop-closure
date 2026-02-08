@@ -201,7 +201,7 @@ export function processEncounter(encounter: Encounter): ProcessEncounterResult {
     encounter.subject?.reference?.replace("Patient/", "") || "";
 
   // Cross-reference EHR patient ID to our canonical patient ID (MPI pattern).
-  // Josh's EHR assigns its own IDs (e.g., "mercy-a1b2c3d"); we resolve them
+  // The upstream EHR assigns its own IDs (e.g., "mercy-a1b2c3d"); we resolve them
   // to our internal IDs (e.g., "patient-001") via the brokerSessions mapping.
   const patientId = resolvePatientId(rawPatientId);
 

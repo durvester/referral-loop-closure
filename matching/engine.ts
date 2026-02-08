@@ -135,7 +135,7 @@ export function matchEncounterToReferrals(
 
   // Get encounter practitioner info from first participant
   const encPractRef = encounter.participant?.[0]?.individual?.reference;
-  // Check embedded NPI identifier on participant (from Josh's EHR encounters)
+  // Check embedded NPI identifier on participant (from upstream EHR encounters)
   const participantId = encounter.participant?.[0]?.individual?.identifier;
   const embeddedNpi = participantId?.system === "http://hl7.org/fhir/sid/us-npi"
     ? participantId.value : undefined;

@@ -192,8 +192,8 @@ export async function fetchEncounterFromEhr(
 // ---------------------------------------------------------------------------
 // Trigger an encounter at the EHR (for demo/testing)
 // ---------------------------------------------------------------------------
-// Trigger an encounter at Josh's EHR.
-// Note: Josh's EHR always sets serviceProvider to "Mercy General Hospital" —
+// Trigger an encounter at the upstream EHR.
+// Note: The upstream EHR always sets serviceProvider to "Mercy General Hospital" —
 // we don't try to override this. The encounter flows through the broker
 // and arrives at our /notifications webhook with the EHR's real data.
 export async function triggerEncounterAtEhr(

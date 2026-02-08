@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // HTTP-level E2E tests
 //
-// These tests start both the broker (Josh's demo server on port 3000) and
+// These tests start both the broker (upstream demo server on port 3000) and
 // our app (port 4000), then hit real HTTP endpoints.  This catches the class
 // of bug we hit in the field — missing imports, broken routes, broken webhook
 // delivery — which function-level tests miss entirely.
