@@ -2,8 +2,6 @@
 
 A proof-of-concept demonstrating **referral loop closure** using the [FHIR Subscriptions Broker architecture](https://github.com/jmandel/cms-fhir-subscriptions-broker) proposed by [Josh Mandel](https://github.com/jmandel) for the CMS Interoperability Framework (July 2026 deadline).
 
-> **Read the full write-up:** [Closing the Referral Loop with FHIR Subscriptions](https://durvester.github.io/referral-loop-closure/)
-
 ## What this does
 
 This application acts as an **Identity-Assured Subscriber (IAS) client** that sits on top of Josh's Subscriptions Broker. It demonstrates a complete referral loop closure workflow:
@@ -27,26 +25,33 @@ Alice's Portal ←──SSE──── This App (port 4000) ←── webhook �
 
 **This app** (`referral-loop-closure/`): Patient portal, physician dashboard, matching engine, consent routing, FHIR resource builders, and test suite.
 
-**Josh's Broker** ([`cms-fhir-subscriptions-broker`](https://github.com/jmandel/cms-fhir-subscriptions-broker)): Subscriptions Broker, IAS client services, and simulated Mercy General EHR. Runs as a separate process.
+**Josh's Broker** (`cms-fhir-subscriptions-broker/`, [upstream](https://github.com/jmandel/cms-fhir-subscriptions-broker)): Subscriptions Broker, IAS client services, and simulated Mercy General EHR. Included as a git submodule; runs as a separate process.
 
 ## Prerequisites
 
 - [Bun](https://bun.sh) v1.3+
-- Josh's Broker repo cloned alongside this one:
-  ```
-  parent-directory/
-  ├── cms-fhir-subscriptions-broker/   # Josh's repo
-  └── referral-loop-closure/           # This repo
-  ```
+
+## Setup
+
+```bash
+git clone --recurse-submodules https://github.com/durvester/referral-loop-closure.git
+cd referral-loop-closure
+bun install
+```
+
+If you've already cloned without `--recurse-submodules`:
+```bash
+git submodule update --init
+```
 
 ## Running
 
 ```bash
 # Terminal 1: Start Josh's Broker + simulated EHR
-cd ../cms-fhir-subscriptions-broker/demo
+cd cms-fhir-subscriptions-broker/demo
 ROUTING_MODE=path bun run server.ts
 
-# Terminal 2: Start this app
+# Terminal 2: Start this app (from repo root)
 bun run server.ts
 
 # Open http://localhost:4000
