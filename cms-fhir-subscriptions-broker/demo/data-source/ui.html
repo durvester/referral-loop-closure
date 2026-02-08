@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mercy General EHR</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  /* Theme variables */
+  :root {
+    --bg-primary: #0a1a10;
+    --bg-header: #1a3c2a;
+    --border-primary: #27ae60;
+    --text-primary: #e0e0e0;
+    --text-secondary: #8899aa;
+    --text-heading: #82e0aa;
+    --text-subtitle: #27ae60;
+    --card-bg: rgba(255,255,255,0.05);
+    --card-border: rgba(39,174,96,0.3);
+    --table-header-border: rgba(255,255,255,0.1);
+    --table-cell-border: rgba(255,255,255,0.05);
+    --log-entry-border: rgba(255,255,255,0.05);
+    --details-summary: #27ae60;
+    --details-pre-bg: rgba(0,0,0,0.4);
+    --details-pre-color: #bdb;
+    --input-bg: #0d2818;
+    --input-border: rgba(39,174,96,0.3);
+    --stat-color: #82e0aa;
+    --stat-label: #889;
+  }
+  
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-primary: #f5faf7;
+      --bg-header: #d5f5e3;
+      --border-primary: #27ae60;
+      --text-primary: #333;
+      --text-secondary: #666;
+      --text-heading: #1e8449;
+      --text-subtitle: #229954;
+      --card-bg: rgba(0,0,0,0.02);
+      --card-border: rgba(39,174,96,0.25);
+      --table-header-border: rgba(0,0,0,0.1);
+      --table-cell-border: rgba(0,0,0,0.05);
+      --log-entry-border: rgba(0,0,0,0.08);
+      --details-summary: #229954;
+      --details-pre-bg: rgba(0,0,0,0.05);
+      --details-pre-color: #1e5631;
+      --input-bg: #e8f6ef;
+      --input-border: rgba(39,174,96,0.4);
+      --stat-color: #1e8449;
+      --stat-label: #666;
+    }
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-primary); color: var(--text-primary); min-height: 100vh;
+  }
+  header {
+    background: var(--bg-header); padding: 16px 24px; border-bottom: 2px solid var(--border-primary);
+    display: flex; align-items: center; gap: 16px;
+  }
+  header h1 { font-size: 1.3rem; color: var(--text-heading); }
+  header .subtitle { font-size: 0.85rem; color: var(--text-subtitle); }
+  
+  .container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 8px; padding: 16px; margin-bottom: 16px;
+  }
+  .card h2 { font-size: 0.85rem; margin-bottom: 12px; color: var(--text-heading); text-transform: uppercase; letter-spacing: 0.5px; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th { text-align: left; color: var(--text-secondary); font-size: 0.72rem; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid var(--table-header-border); }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--table-cell-border); }
+  .tag { padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; display: inline-block; }
+  .tag-active { background: rgba(39,174,96,0.2); color: #2ecc71; }
+  .tag-planned { background: rgba(52,152,219,0.2); color: #5dade2; }
+  .tag-emer { background: rgba(231,76,60,0.2); color: #e74c3c; }
+  .tag-amb { background: rgba(155,89,182,0.2); color: #bb8fce; }
+  .tag-imp { background: rgba(243,156,18,0.2); color: #f39c12; }
+  .tag-default { background: rgba(255,255,255,0.1); color: #aaa; }
+  @media (prefers-color-scheme: light) {
+    .tag-default { background: rgba(0,0,0,0.08); color: #666; }
+  }
+  .log-entry {
+    padding: 6px 8px; border-bottom: 1px solid var(--log-entry-border);
+    font-size: 0.82rem; animation: fadeIn 0.3s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .log-time { color: #666; font-size: 0.72rem; float: right; }
+  @media (prefers-color-scheme: light) {
+    .log-time { color: #888; }
+  }
+  .log-type { font-weight: 600; color: var(--text-heading); font-size: 0.75rem; text-transform: uppercase; }
+  .log-detail { color: #bbb; }
+  @media (prefers-color-scheme: light) {
+    .log-detail { color: #555; }
+  }
+  #log-container { max-height: 400px; overflow-y: auto; }
+  .stat { font-size: 2rem; font-weight: 700; color: var(--stat-color); }
+  .stat-label { font-size: 0.8rem; color: var(--stat-label); }
+  details summary { cursor: pointer; font-size: 0.8rem; color: var(--details-summary); }
+  details pre {
+    background: var(--details-pre-bg); padding: 8px; border-radius: 4px;
+    font-size: 0.72rem; overflow-x: auto; margin-top: 4px; color: var(--details-pre-color);
+    max-height: 200px; overflow-y: auto;
+  }
+  select, input[type="text"], input[type="date"] {
+    background: var(--input-bg); color: var(--text-primary); border: 1px solid var(--input-border);
+    border-radius: 4px; padding: 6px 8px; font-size: 0.82rem; font-family: inherit;
+  }
+  select:focus, input:focus { outline: none; border-color: var(--border-primary); }
+  .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .form-row > * { flex: 1; }
+  .form-label { font-size: 0.72rem; color: var(--stat-label); text-transform: uppercase; margin-bottom: 3px; }
+  .form-group { display: flex; flex-direction: column; }
+  button {
+    border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;
+    font-size: 0.85rem; font-weight: 600; transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-green { background: #27ae60; color: #fff; }
+  .btn-blue { background: #2471a3; color: #fff; }
+  .btn-row { display: flex; gap: 8px; }
+  .btn-row button { flex: 1; }
+
+  /* Mobile responsive styles */
+  @media (max-width: 768px) {
+    .grid2 {
+      grid-template-columns: 1fr;
+    }
+    .container {
+      padding: 0 12px;
+      margin: 16px auto;
+    }
+    header {
+      padding: 12px 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    header h1 {
+      font-size: 1.1rem;
+    }
+    .card {
+      padding: 12px;
+    }
+    table {
+      font-size: 0.75rem;
+    }
+    th, td {
+      padding: 4px 6px;
+    }
+    .stat {
+      font-size: 1.5rem;
+    }
+    .form-row {
+      flex-direction: column;
+    }
+  }
+
+  @media (max-width: 480px) {
+    header {
+      padding: 10px 12px;
+    }
+    .container {
+      padding: 0 8px;
+    }
+    .card {
+      padding: 10px;
+    }
+    table {
+      font-size: 0.7rem;
+      display: block;
+      overflow-x: auto;
+    }
+    th, td {
+      padding: 3px 4px;
+      white-space: nowrap;
+    }
+    .btn-row {
+      flex-direction: column;
+    }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mercy General EHR</h1>
+  <span class="subtitle">Electronic Health Record System — Admin View</span>
+</header>
+<div class="container">
+  <div class="grid2">
+    <div class="card">
+      <h2>Stats</h2>
+      <div style="display:flex; gap:24px;">
+        <div><div class="stat" id="stat-patients">0</div><div class="stat-label">Patients</div></div>
+        <div><div class="stat" id="stat-encounters">0</div><div class="stat-label">Encounters</div></div>
+        <div><div class="stat" id="stat-reads">0</div><div class="stat-label">API Reads</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Create Encounter</h2>
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">Patient</div>
+          <select id="create-patient"><option value="">Select patient...</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">Class</div>
+          <select id="create-class">
+            <option value="EMER">Emergency (EMER)</option>
+            <option value="AMB">Ambulatory (AMB)</option>
+            <option value="IMP">Inpatient (IMP)</option>
+            <option value="OBSENC">Observation (OBSENC)</option>
+            <option value="SS">Short Stay (SS)</option>
+            <option value="VR">Virtual (VR)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Type</div>
+          <select id="create-type">
+            <option value="50849002">ED Visit</option>
+            <option value="185349003">Check-up</option>
+            <option value="308335008">Procedure</option>
+            <option value="390906007">Follow-up</option>
+            <option value="281036007">Consultation</option>
+            <option value="32485007">Hospital Admission</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <div class="form-label">Reason Code</div>
+          <select id="create-reason">
+            <option value="">None</option>
+            <option value="29857009">Chest pain</option>
+            <option value="386661006">Fever</option>
+            <option value="25064002">Headache</option>
+            <option value="267036007">Dyspnea</option>
+            <option value="161891005">Back pain</option>
+            <option value="422587007">Nausea</option>
+            <option value="3723001">Arthritis</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <div class="form-label">Scheduled Date</div>
+          <input type="date" id="create-date">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-green" id="btn-admit" onclick="createEncounter('now')">Admit Now</button>
+        <button class="btn-blue" id="btn-schedule" onclick="createEncounter('planned')">Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Master Patient Index (MPI)</h2>
+    <table>
+      <tr><th>MRN (Source ID)</th><th>Name</th><th>DOB</th><th>Encounters</th></tr>
+      <tbody id="mpi-body"><tr><td colspan="4" style="color:#666;">No patients registered</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>All Encounters</h2>
+    <table>
+      <tr><th>ID</th><th>Patient</th><th>Class</th><th>Type</th><th>Reason</th><th>Status</th><th>Date</th></tr>
+      <tbody id="enc-body"><tr><td colspan="7" style="color:#666;">No encounters yet</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Event Log (live tail)</h2>
+    <div id="log-container"></div>
+  </div>
+</div>
+<script>
+var readCount = 0;
+var knownPatients = [];
+
+// Set default date to tomorrow
+var tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+document.getElementById("create-date").value = tomorrow.toISOString().split("T")[0];
+
+function classTag(code) {
+  var cls = "tag-default";
+  if (code === "EMER") cls = "tag-emer";
+  else if (code === "AMB") cls = "tag-amb";
+  else if (code === "IMP") cls = "tag-imp";
+  else if (code === "planned") cls = "tag-planned";
+  return cls;
+}
+
+function statusTag(status) {
+  if (status === "planned") return "tag-planned";
+  if (status === "in-progress") return "tag-active";
+  return "tag-default";
+}
+
+function loadState() {
+  fetch(__BASE__ + "/admin/state").then(function(r){ return r.json(); }).then(function(s) {
+    document.getElementById("stat-patients").textContent = s.patients ? s.patients.length : 0;
+    document.getElementById("stat-encounters").textContent = s.encounters ? s.encounters.length : 0;
+
+    if (s.patients && s.patients.length) {
+      knownPatients = s.patients;
+      document.getElementById("mpi-body").innerHTML = s.patients.map(function(p) {
+        return "<tr><td style='font-family:monospace;'>" + p.sourceId + "</td><td>" + p.name + "</td><td>" + p.birthDate + "</td><td>" + (p.encounterCount || 0) + "</td></tr>";
+      }).join("");
+
+      // Update patient dropdown
+      var sel = document.getElementById("create-patient");
+      var current = sel.value;
+      sel.innerHTML = '<option value="">Select patient...</option>' + s.patients.map(function(p) {
+        return '<option value="' + p.name + '|' + p.birthDate + '">' + p.name + ' (DOB: ' + p.birthDate + ')</option>';
+      }).join("");
+      if (current) sel.value = current;
+    }
+
+    if (s.encounters && s.encounters.length) {
+      document.getElementById("enc-body").innerHTML = s.encounters.map(function(e) {
+        var code = e.classCode || "EMER";
+        var display = e.classDisplay || "emergency";
+        var typeDisplay = e.typeDisplay || "ED Visit";
+        var reason = e.reasonDisplay || "—";
+        var status = e.status || "in-progress";
+        var date = e.periodStart ? new Date(e.periodStart).toLocaleDateString() + " " + new Date(e.periodStart).toLocaleTimeString() : "—";
+        return "<tr>" +
+          "<td style='font-family:monospace;'>" + e.id + "</td>" +
+          "<td>" + (e.patient || "?") + "</td>" +
+          "<td><span class='tag " + classTag(code) + "'>" + code + "</span></td>" +
+          "<td>" + typeDisplay + "</td>" +
+          "<td>" + reason + "</td>" +
+          "<td><span class='tag " + statusTag(status) + "'>" + status + "</span></td>" +
+          "<td>" + date + "</td></tr>";
+      }).join("");
+    }
+  });
+}
+loadState();
+
+async function createEncounter(mode) {
+  var patientVal = document.getElementById("create-patient").value;
+  if (!patientVal) { /* flash the select */ document.getElementById("create-patient").style.borderColor = "#e74c3c"; setTimeout(function(){ document.getElementById("create-patient").style.borderColor = ""; }, 1000); return; }
+
+  var parts = patientVal.split("|");
+  var patient = { name: parts[0], birthDate: parts[1] };
+
+  var btn = mode === "planned" ? document.getElementById("btn-schedule") : document.getElementById("btn-admit");
+  btn.disabled = true;
+  btn.textContent = mode === "planned" ? "Scheduling..." : "Admitting...";
+
+  var encounterOptions = {
+    classCode: document.getElementById("create-class").value,
+    typeCode: document.getElementById("create-type").value,
+    reasonCode: document.getElementById("create-reason").value || undefined,
+  };
+  if (mode === "planned") {
+    encounterOptions.status = "planned";
+    encounterOptions.scheduledDate = document.getElementById("create-date").value || undefined;
+  }
+
+  try {
+    await fetch(__BASE__ + "/trigger-event", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ patient: patient, encounterOptions: encounterOptions }),
+    });
+  } catch(e) {}
+
+  btn.textContent = mode === "planned" ? "Schedule" : "Admit Now";
+  btn.disabled = false;
+}
+
+var es = new EventSource(__BASE__ + "/events");
+es.onmessage = function(e) {
+  try {
+    var data = JSON.parse(e.data);
+    if (data.type === "state-sync") return;
+
+    var container = document.getElementById("log-container");
+    var div = document.createElement("div");
+    div.className = "log-entry";
+    var time = new Date(data.timestamp || Date.now()).toLocaleTimeString();
+    div.innerHTML = '<span class="log-time">' + time + '</span>' +
+      '<div class="log-type">' + (data.type || "event") + '</div>' +
+      '<div class="log-detail">' + (data.detail || "") + '</div>' +
+      (data.resource ? '<details><summary>FHIR JSON</summary><pre>' + JSON.stringify(data.resource, null, 2) + '</pre></details>' : '');
+    container.prepend(div);
+
+    if (data.type === "encounter-created" || data.type === "patient-registered" || data.type === "patient-auto-registered") {
+      loadState();
+    }
+    if (data.type === "encounter-read") {
+      readCount++;
+      document.getElementById("stat-reads").textContent = readCount;
+    }
+  } catch(err) {}
+};
+</script>
+
+<footer class="app-footer">
+  <a href="https://github.com/jmandel/cms-fhir-subscriptions-broker" target="_blank">📄 GitHub</a>
+  <span class="separator">|</span>
+  <a href="https://www.cms.gov/priorities/key-initiatives/interoperability" target="_blank">🏥 CMS Interoperability</a>
+</footer>
+</body>
+</html>

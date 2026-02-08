@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IAS Client — Identity Verification</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  /* Theme variables */
+  :root {
+    --bg-primary: #0d1b2a;
+    --bg-header: #1a3a5c;
+    --border-primary: #3498db;
+    --text-primary: #e0e0e0;
+    --text-secondary: #8899aa;
+    --text-heading: #85c1e9;
+    --text-subtitle: #5dade2;
+    --card-bg: rgba(255,255,255,0.05);
+    --card-border: rgba(52,152,219,0.3);
+    --details-summary: #5dade2;
+    --details-pre-bg: rgba(0,0,0,0.4);
+    --details-pre-color: #aaccee;
+    --tech-label: #667;
+    --tech-value: #889;
+    --empty-records: #556;
+    --encounter-card-bg: rgba(39,174,96,0.08);
+    --encounter-card-border: rgba(39,174,96,0.2);
+    --encounter-title: #82e0aa;
+    --encounter-detail: #aaa;
+    --welcome-subtitle: #8899aa;
+    --welcome-avatar-bg: #2980b9;
+  }
+  
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-primary: #f0f7fc;
+      --bg-header: #d6eaf8;
+      --border-primary: #3498db;
+      --text-primary: #333;
+      --text-secondary: #666;
+      --text-heading: #1a5276;
+      --text-subtitle: #2471a3;
+      --card-bg: rgba(0,0,0,0.02);
+      --card-border: rgba(52,152,219,0.25);
+      --details-summary: #2471a3;
+      --details-pre-bg: rgba(0,0,0,0.05);
+      --details-pre-color: #2c5282;
+      --tech-label: #888;
+      --tech-value: #555;
+      --empty-records: #888;
+      --encounter-card-bg: rgba(39,174,96,0.08);
+      --encounter-card-border: rgba(39,174,96,0.25);
+      --encounter-title: #1e8449;
+      --encounter-detail: #555;
+      --welcome-subtitle: #666;
+      --welcome-avatar-bg: #3498db;
+    }
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+  header {
+    background: var(--bg-header);
+    padding: 16px 24px;
+    border-bottom: 2px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header h1 { font-size: 1.3rem; color: var(--text-heading); }
+  header .subtitle { font-size: 0.85rem; color: var(--text-subtitle); }
+  
+  .container { max-width: 600px; margin: 24px auto; padding: 0 16px; }
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 16px;
+    transition: opacity 0.4s, transform 0.4s;
+  }
+  .card.hidden { opacity: 0; transform: translateY(-10px); display: none; }
+  .card.fading-in { opacity: 1; transform: translateY(0); }
+  .card h2 { font-size: 1.1rem; margin-bottom: 16px; color: var(--text-heading); }
+  .step-indicator { display: flex; gap: 8px; margin-bottom: 24px; }
+  .step-dot {
+    flex: 1; height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.1); transition: background 0.5s;
+  }
+  @media (prefers-color-scheme: light) {
+    .step-dot { background: rgba(0,0,0,0.1); }
+  }
+  .step-dot.active { background: #3498db; }
+  .step-dot.done { background: #2ecc71; }
+  button {
+    border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;
+    font-size: 0.95rem; font-weight: 600; transition: all 0.2s; width: 100%;
+  }
+  button:hover { opacity: 0.9; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #3498db; color: #fff; }
+  .spinner {
+    display: inline-block; width: 20px; height: 20px;
+    border: 3px solid rgba(255,255,255,0.3); border-radius: 50%;
+    border-top-color: #fff; animation: spin 0.8s linear infinite;
+    margin-right: 8px; vertical-align: middle;
+  }
+  @media (prefers-color-scheme: light) {
+    .spinner {
+      border-color: rgba(0,0,0,0.15);
+      border-top-color: #333;
+    }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .step-content { text-align: center; padding: 16px 0; }
+  .step-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .step-status { color: var(--text-secondary); font-size: 0.9rem; }
+  .patient-name-display { color: var(--text-heading); font-weight: 600; }
+
+  /* Welcome / PHR screen */
+  #welcome-section { display: none; }
+  .welcome-header {
+    text-align: center;
+    padding: 24px 0 16px;
+  }
+  .welcome-avatar {
+    width: 64px; height: 64px; border-radius: 50%; background: var(--welcome-avatar-bg);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 12px;
+  }
+  .welcome-name { font-size: 1.4rem; font-weight: 600; color: var(--text-heading); }
+  .welcome-subtitle { color: var(--welcome-subtitle); font-size: 0.9rem; margin-top: 4px; }
+  .welcome-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 0.72rem; font-weight: 600; margin-top: 8px;
+    background: rgba(39,174,96,0.15); color: #2ecc71;
+  }
+  .records-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .records-header h3 {
+    font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-secondary); font-weight: 600;
+  }
+  .records-count {
+    font-size: 0.75rem; color: var(--text-subtitle);
+    background: rgba(52,152,219,0.15); padding: 2px 8px; border-radius: 10px;
+  }
+  .empty-records {
+    text-align: center; padding: 32px 16px; color: var(--empty-records);
+    font-size: 0.9rem;
+  }
+  .empty-records .empty-icon { font-size: 2rem; margin-bottom: 8px; opacity: 0.5; }
+  .encounter-card {
+    background: var(--encounter-card-bg); border: 1px solid var(--encounter-card-border);
+    border-radius: 6px; padding: 12px; margin-bottom: 8px; font-size: 0.85rem;
+    animation: slideIn 0.4s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .encounter-card .enc-title { font-weight: 600; color: var(--encounter-title); }
+  .encounter-card .enc-detail { color: var(--encounter-detail); font-size: 0.8rem; }
+  .tag { padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; }
+  .tag-green { background: rgba(39,174,96,0.2); color: #2ecc71; }
+  details { margin-top: 8px; }
+  details summary { cursor: pointer; font-size: 0.8rem; color: var(--details-summary); }
+  details pre {
+    background: var(--details-pre-bg); padding: 8px; border-radius: 4px;
+    font-size: 0.72rem; overflow-x: auto; margin-top: 4px; color: var(--details-pre-color);
+    max-height: 200px; overflow-y: auto;
+  }
+  .tech-details {
+    margin-top: 16px; padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  @media (prefers-color-scheme: light) {
+    .tech-details { border-top-color: rgba(0,0,0,0.08); }
+  }
+  .tech-details summary {
+    cursor: pointer; font-size: 0.78rem; color: var(--tech-label);
+  }
+  .tech-row {
+    display: flex; justify-content: space-between; padding: 4px 0;
+    font-size: 0.78rem; color: var(--tech-value);
+  }
+  .tech-row .label { color: var(--tech-label); }
+
+  /* Navigation notice (shown after ID proofing completion) */
+  .navigation-notice {
+    background: rgba(52,152,219,0.1);
+    border-color: rgba(52,152,219,0.3);
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .navigation-notice-title {
+    color: var(--text-heading);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  .navigation-notice-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+  }
+
+  /* Mobile responsive styles */
+  @media (max-width: 600px) {
+    header {
+      padding: 12px 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    header h1 {
+      font-size: 1.1rem;
+    }
+    .container {
+      padding: 0 12px;
+      margin: 16px auto;
+    }
+    .card {
+      padding: 16px;
+    }
+    .step-indicator {
+      gap: 4px;
+    }
+    .welcome-avatar {
+      width: 52px;
+      height: 52px;
+      font-size: 1.3rem;
+    }
+    .welcome-name {
+      font-size: 1.2rem;
+    }
+    .tech-row {
+      flex-direction: column;
+      gap: 2px;
+    }
+    .tech-row span:last-child {
+      word-break: break-all;
+    }
+  }
+
+  @media (max-width: 400px) {
+    header {
+      padding: 10px 12px;
+    }
+    .container {
+      padding: 0 8px;
+    }
+    .card {
+      padding: 12px;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+    }
+  }
+
+  /* Footer */
+  .app-footer {
+    background: var(--bg-header);
+    border-top: 1px solid var(--border-primary);
+    padding: 12px 24px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .app-footer a {
+    color: var(--text-subtitle);
+    text-decoration: none;
+    margin: 0 8px;
+  }
+  .app-footer a:hover {
+    color: var(--text-heading);
+    text-decoration: underline;
+  }
+  .app-footer .separator {
+    color: var(--border-primary);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>IAS Client</h1>
+  <span class="subtitle">Identity-Assured Subscriber</span>
+  <span style="margin-left:auto; font-size:0.85rem; color:var(--text-subtitle);" id="patient-display"></span>
+</header>
+
+<div class="container">
+  <div id="wizard">
+    <div class="step-indicator">
+      <div class="step-dot" id="sd-1"></div>
+      <div class="step-dot" id="sd-2"></div>
+      <div class="step-dot" id="sd-3"></div>
+      <div class="step-dot" id="sd-4"></div>
+      <div class="step-dot" id="sd-5"></div>
+    </div>
+
+    <div class="card" id="step-start">
+      <h2>Identity Verification (IAL2)</h2>
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="color:#8899aa; font-size:0.9rem;">Verifying identity for</div>
+        <div class="patient-name-display" id="start-patient-name" style="font-size:1.2rem; margin:8px 0;"></div>
+      </div>
+      <button class="btn-primary" id="btn-begin" onclick="beginVerification()">Begin Verification</button>
+    </div>
+
+    <div class="card hidden" id="step-phone">
+      <h2>Step 1: Phone Verification</h2>
+      <div class="step-content">
+        <div class="step-icon">&#128241;</div>
+        <div class="step-status" id="phone-status"><span class="spinner"></span> Sending verification code...</div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step-license">
+      <h2>Step 2: Driver's License</h2>
+      <div class="step-content">
+        <div class="step-icon">&#128179;</div>
+        <div class="step-status" id="license-status"><span class="spinner"></span> Scanning driver's license...</div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step-selfie">
+      <h2>Step 3: Selfie Verification</h2>
+      <div class="step-content">
+        <div class="step-icon">&#128247;</div>
+        <div class="step-status" id="selfie-status"><span class="spinner"></span> Capturing selfie...</div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step-processing">
+      <h2>Step 4: Verifying Identity</h2>
+      <div class="step-content">
+        <div class="step-icon">&#128270;</div>
+        <div class="step-status" id="processing-status"><span class="spinner"></span> Cross-referencing identity documents...</div>
+      </div>
+    </div>
+
+    <div class="card hidden" id="step-complete">
+      <h2>Step 5: Identity Verified</h2>
+      <div style="text-align:center;">
+        <div style="color:#2ecc71; font-size:3rem;">&#10003;</div>
+        <div class="patient-name-display" id="complete-patient-name" style="font-size:1.1rem; margin:8px 0;"></div>
+        <div style="color:#8899aa;">Identity confirmed via IAL2 proofing</div>
+        <div id="auto-status" style="color:#8899aa; font-size:0.85rem; margin-top:12px;">
+          <span class="spinner"></span> Obtaining permission ticket &amp; authenticating...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Patient welcome / PHR screen (shown after verification) -->
+  <div id="welcome-section">
+    <div class="welcome-header">
+      <div class="welcome-avatar" id="welcome-avatar">?</div>
+      <div class="welcome-name" id="welcome-name"></div>
+      <div class="welcome-subtitle">Your health records, all in one place</div>
+      <div class="welcome-badge">Identity Verified (IAL2)</div>
+    </div>
+
+    <!-- Navigation notice for users who opened this from dashboard -->
+    <div class="card navigation-notice">
+      <div class="navigation-notice-title">
+        ✓ Setup complete!
+      </div>
+      <div class="navigation-notice-subtitle">
+        You can close this tab or switch back to the <strong>Dashboard</strong> to trigger encounters. This tab will stay updated as information arrives.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="records-header">
+        <h3>Health Records</h3>
+        <span class="records-count" id="records-count">0 records</span>
+      </div>
+      <div id="encounters-container">
+        <div class="empty-records">
+          <div class="empty-icon">&#128203;</div>
+          <div>No records yet.</div>
+          <div style="font-size:0.8rem; margin-top:4px;">
+            When healthcare events are reported, they will appear here automatically.
+          </div>
+        </div>
+      </div>
+
+      <div class="tech-details">
+        <details>
+          <summary>Technical details</summary>
+          <div style="padding:8px 0;">
+            <div class="tech-row"><span class="label">Patient Context</span><span id="tech-patient">&mdash;</span></div>
+            <div class="tech-row"><span class="label">Scopes</span><span id="tech-scopes">patient/Encounter.rs</span></div>
+            <div class="tech-row"><span class="label">Subscription</span><span id="tech-sub">&mdash;</span></div>
+          </div>
+          <div id="tech-ticket"></div>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var params = new URLSearchParams(window.location.search);
+var PATIENT;
+var hintParam = params.get("hint");
+if (hintParam) {
+  try { PATIENT = JSON.parse(atob(hintParam)); } catch(e) { PATIENT = { name: "Unknown Patient", birthDate: "1990-01-01" }; }
+} else {
+  PATIENT = {
+    name: params.get("name") || "Unknown Patient",
+    birthDate: params.get("birthDate") || "1990-01-01",
+  };
+}
+var PATIENT_KEY = PATIENT.name + "|" + PATIENT.birthDate;
+
+document.getElementById("patient-display").textContent = PATIENT.name;
+document.getElementById("start-patient-name").textContent = PATIENT.name + " (DOB: " + PATIENT.birthDate + ")";
+document.getElementById("complete-patient-name").textContent = PATIENT.name;
+
+var initials = PATIENT.name.split(" ").map(function(w){ return w[0]; }).join("").slice(0,2);
+document.getElementById("welcome-avatar").textContent = initials;
+document.getElementById("welcome-name").textContent = PATIENT.name;
+
+var currentStep = 0;
+var encounterCount = 0;
+var knownEncIds = {};
+
+function updateStepDots() {
+  for (var i = 1; i <= 5; i++) {
+    var dot = document.getElementById("sd-" + i);
+    if (i < currentStep) dot.className = "step-dot done";
+    else if (i === currentStep) dot.className = "step-dot active";
+    else dot.className = "step-dot";
+  }
+}
+
+function showCard(id) {
+  var cards = document.querySelectorAll("#wizard .card");
+  cards.forEach(function(c) { if (c.id !== id) c.classList.add("hidden"); });
+  var target = document.getElementById(id);
+  target.classList.remove("hidden");
+  target.classList.add("fading-in");
+}
+
+function postStep(step) {
+  return fetch(__BASE__ + "/id-proofing/step", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ step: step, patient: PATIENT }),
+  });
+}
+
+async function ensureRegistered() {
+  var brokerResp = await fetch(__BROKER__ + "/register-patient", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ sourceId: "pending", name: PATIENT.name, birthDate: PATIENT.birthDate }),
+  });
+  await brokerResp.json();
+
+  var ehrResp = await fetch(__EHR__ + "/register-patient", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ name: PATIENT.name, birthDate: PATIENT.birthDate }),
+  });
+  var ehrData = await ehrResp.json();
+
+  await fetch(__BROKER__ + "/register-patient", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ sourceId: ehrData.sourceId, name: PATIENT.name, birthDate: PATIENT.birthDate }),
+  });
+}
+
+function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+
+async function beginVerification() {
+  var btn = document.getElementById("btn-begin");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Starting...';
+
+  // Start registration in parallel — don't block the wizard animation
+  var registrationDone = ensureRegistered();
+
+  // Step 1: Phone
+  await sleep(100);
+  currentStep = 1;
+  updateStepDots();
+  showCard("step-phone");
+  postStep("phone-sent");
+
+  await sleep(250);
+  document.getElementById("phone-status").innerHTML = "&#10003; Phone number verified";
+  postStep("phone-verified");
+
+  // Step 2: License
+  await sleep(100);
+  currentStep = 2;
+  updateStepDots();
+  showCard("step-license");
+  postStep("license-scanning");
+
+  await sleep(200);
+  document.getElementById("license-status").innerHTML = "&#10003; License captured — " + PATIENT.name;
+  postStep("license-captured");
+
+  // Step 3: Selfie
+  await sleep(100);
+  currentStep = 3;
+  updateStepDots();
+  showCard("step-selfie");
+  postStep("selfie-capturing");
+
+  await sleep(200);
+  document.getElementById("selfie-status").innerHTML = "&#10003; Selfie captured — face match 98.7%";
+  postStep("selfie-captured");
+
+  // Step 4: Processing
+  await sleep(100);
+  currentStep = 4;
+  updateStepDots();
+  showCard("step-processing");
+  postStep("verifying");
+
+  await sleep(200);
+  document.getElementById("processing-status").innerHTML = "&#10003; Identity confirmed!";
+
+  // Step 5: Complete — trigger server-side auth
+  currentStep = 5;
+  updateStepDots();
+  showCard("step-complete");
+
+  // Wait for registration to finish before triggering auth
+  await registrationDone;
+
+  fetch(__BASE__ + "/id-proofing/complete", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ patient: PATIENT }),
+  });
+
+  pollUntilReady();
+}
+
+function pollUntilReady() {
+  var pollCount = 0;
+  var maxPolls = 75; // 30 seconds total (400ms * 75)
+  var poll = setInterval(function() {
+    pollCount++;
+    fetch(__BASE__ + "/state?name=" + encodeURIComponent(PATIENT.name) + "&birthDate=" + PATIENT.birthDate)
+      .then(function(r) { return r.json(); })
+      .then(function(s) {
+        // Check for errors in the session events
+        var hasError = s.events && s.events.some(function(e) { return e.type === "error"; });
+        if (hasError) {
+          clearInterval(poll);
+          var lastError = s.events.filter(function(e) { return e.type === "error"; }).pop();
+          document.getElementById("auto-status").innerHTML =
+            '<span style="color:#e74c3c;">✗ ' + (lastError ? lastError.detail : 'Authentication failed') + '</span>';
+          return;
+        }
+
+        if (s.token && (!s.subscriptions || !s.subscriptions.length)) {
+          document.getElementById("auto-status").innerHTML =
+            '<span class="spinner"></span> Subscribing to encounter notifications...';
+        }
+        if (s.subscriptions && s.subscriptions.length) {
+          clearInterval(poll);
+          showWelcome(s);
+        }
+
+        // Timeout after maxPolls
+        if (pollCount >= maxPolls && (!s.subscriptions || !s.subscriptions.length)) {
+          clearInterval(poll);
+          document.getElementById("auto-status").innerHTML =
+            '<span style="color:#e74c3c;">✗ Timed out waiting for authentication</span>';
+        }
+      })
+      .catch(function(err) {
+        // Network error - keep polling
+        console.error("Poll error:", err);
+      });
+  }, 400);
+}
+
+function formatJwt(jwt) {
+  try {
+    var parts = jwt.split(".");
+    var header = JSON.parse(atob(parts[0]));
+    var payload = JSON.parse(atob(parts[1]));
+    return "Header:\n" + JSON.stringify(header, null, 2) + "\n\nPayload:\n" + JSON.stringify(payload, null, 2);
+  } catch(e) { return jwt; }
+}
+
+function showWelcome(s) {
+  document.getElementById("wizard").style.display = "none";
+  document.getElementById("welcome-section").style.display = "block";
+
+  // Fill tech details
+  if (s.token) {
+    document.getElementById("tech-patient").textContent = s.token.patient || "\u2014";
+  }
+  if (s.subscriptions && s.subscriptions.length) {
+    document.getElementById("tech-sub").textContent = s.subscriptions[0].id + " (active)";
+  }
+  if (s.permissionTicket) {
+    document.getElementById("tech-ticket").innerHTML =
+      '<details><summary>Permission Ticket</summary><pre>' + formatJwt(s.permissionTicket) + '</pre></details>';
+  }
+
+  // Show any encounters already received
+  if (s.encounters && s.encounters.length) {
+    s.encounters.forEach(function(enc) { addEncounterCard(enc); });
+  }
+
+  // Connect SSE for live encounter updates
+  connectSSE();
+}
+
+function connectSSE() {
+  var es = new EventSource(__BASE__ + "/events");
+  es.onmessage = function(e) {
+    try {
+      var data = JSON.parse(e.data);
+      if (data.type === "encounter-fetched" && data.resource && data._patientKey === PATIENT_KEY) {
+        addEncounterCard(data.resource);
+      }
+    } catch(err) {}
+  };
+}
+
+function addEncounterCard(enc) {
+  var encId = enc.id || Math.random().toString();
+  if (knownEncIds[encId]) return;
+  knownEncIds[encId] = true;
+  encounterCount++;
+
+  var container = document.getElementById("encounters-container");
+  // Clear the empty state on first encounter
+  if (encounterCount === 1) container.innerHTML = "";
+
+  document.getElementById("records-count").textContent = encounterCount + " record" + (encounterCount === 1 ? "" : "s");
+
+  var card = document.createElement("div");
+  card.className = "encounter-card";
+  var typeName = (enc.type && enc.type[0] && enc.type[0].coding && enc.type[0].coding[0]) ? enc.type[0].coding[0].display : "Encounter";
+  var provider = enc.serviceProvider ? enc.serviceProvider.display : "";
+  var subject = enc.subject ? enc.subject.reference : "";
+  card.innerHTML = '<div class="enc-title">' + typeName + '</div>' +
+    '<div class="enc-detail">' + provider + ' &mdash; ' + (enc.status || "") + '</div>' +
+    '<div class="enc-detail">Patient: ' + subject + '</div>' +
+    '<details><summary>Full resource</summary><pre>' + JSON.stringify(enc, null, 2) + '</pre></details>';
+  container.prepend(card);
+}
+</script>
+
+<footer class="app-footer">
+  <a href="https://github.com/jmandel/cms-fhir-subscriptions-broker" target="_blank">📄 GitHub</a>
+  <span class="separator">|</span>
+  <a href="https://www.cms.gov/priorities/key-initiatives/interoperability" target="_blank">🏥 CMS Interoperability</a>
+</footer>
+</body>
+</html>

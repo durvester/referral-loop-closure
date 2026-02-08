@@ -1,3 +1,0 @@
-[submodule "cms-fhir-subscriptions-broker"]
-	path = cms-fhir-subscriptions-broker
-	url = https://github.com/jmandel/cms-fhir-subscriptions-broker.git

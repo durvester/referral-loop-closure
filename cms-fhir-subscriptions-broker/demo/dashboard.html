@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FHIR Subscriptions Broker — Demo Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  /* Theme variables */
+  :root {
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: rgba(0,0,0,0.2);
+    --border-primary: #0f3460;
+    --text-primary: #e0e0e0;
+    --text-secondary: #8899aa;
+    --text-heading: #fff;
+    --patient-banner-bg: rgba(155,89,182,0.15);
+    --patient-banner-border: rgba(155,89,182,0.3);
+    --patient-name: #d7bde2;
+    --panel-client-border: #3498db;
+    --panel-client-header-bg: #1a3a5c;
+    --panel-client-header-color: #85c1e9;
+    --panel-broker-border: #e67e22;
+    --panel-broker-header-bg: #4a2f10;
+    --panel-broker-header-color: #f0b27a;
+    --panel-datasource-border: #27ae60;
+    --panel-datasource-header-bg: #1a3c2a;
+    --panel-datasource-header-color: #82e0aa;
+    --btn-outline-border: rgba(255,255,255,0.2);
+    --btn-outline-color: #aaa;
+    --btn-outline-hover-border: rgba(255,255,255,0.4);
+    --btn-outline-hover-color: #ddd;
+    --event-bg: rgba(255,255,255,0.05);
+    --event-detail: #ccc;
+    --event-time: #666;
+    --details-summary: #7799bb;
+    --details-pre-bg: rgba(0,0,0,0.4);
+    --details-pre-color: #aaccee;
+    --state-box-bg: rgba(255,255,255,0.05);
+    --state-label: #889;
+    --state-value: #ddd;
+    --step-bg: rgba(255,255,255,0.05);
+    --step-color: #889;
+    --knowledge-card-bg: rgba(52,152,219,0.08);
+    --knowledge-card-border: rgba(52,152,219,0.2);
+    --knowledge-title: #85c1e9;
+    --select-bg: #1a3c2a;
+    --select-border: rgba(39,174,96,0.3);
+  }
+  
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-primary: #f5f7fa;
+      --bg-secondary: #e8eef4;
+      --bg-tertiary: rgba(0,0,0,0.03);
+      --border-primary: #c5d1dc;
+      --text-primary: #333;
+      --text-secondary: #666;
+      --text-heading: #222;
+      --patient-banner-bg: rgba(155,89,182,0.1);
+      --patient-banner-border: rgba(155,89,182,0.25);
+      --patient-name: #7b4a9e;
+      --panel-client-header-bg: #d6eaf8;
+      --panel-client-header-color: #1a5276;
+      --panel-broker-header-bg: #fdebd0;
+      --panel-broker-header-color: #935116;
+      --panel-datasource-header-bg: #d5f5e3;
+      --panel-datasource-header-color: #1e8449;
+      --btn-outline-border: rgba(0,0,0,0.15);
+      --btn-outline-color: #555;
+      --btn-outline-hover-border: rgba(0,0,0,0.3);
+      --btn-outline-hover-color: #333;
+      --event-bg: rgba(0,0,0,0.03);
+      --event-detail: #555;
+      --event-time: #888;
+      --details-summary: #2471a3;
+      --details-pre-bg: rgba(0,0,0,0.05);
+      --details-pre-color: #2c5282;
+      --state-box-bg: rgba(0,0,0,0.03);
+      --state-label: #666;
+      --state-value: #333;
+      --step-bg: rgba(0,0,0,0.05);
+      --step-color: #666;
+      --knowledge-card-bg: rgba(52,152,219,0.08);
+      --knowledge-card-border: rgba(52,152,219,0.2);
+      --knowledge-title: #1a5276;
+      --select-bg: #e8f6ef;
+      --select-border: rgba(39,174,96,0.4);
+    }
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+  }
+  header {
+    background: var(--bg-secondary);
+    padding: 12px 24px;
+    border-bottom: 2px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header h1 { font-size: 1.3rem; font-weight: 600; color: var(--text-heading); }
+  header .subtitle { font-size: 0.85rem; color: var(--text-secondary); }
+  .patient-banner {
+    background: var(--patient-banner-bg);
+    border-bottom: 1px solid var(--patient-banner-border);
+    padding: 8px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.85rem;
+  }
+  .patient-banner .avatar {
+    width: 28px; height: 28px; border-radius: 50%; background: #9b59b6;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.7rem; color: #fff;
+  }
+  .patient-banner .name { font-weight: 600; color: var(--patient-name); }
+  .patient-banner .detail { color: var(--text-secondary); font-size: 0.78rem; }
+  .status-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    display: inline-block; margin-right: 4px;
+  }
+  .status-dot.connected { background: #2ecc71; }
+  .status-dot.disconnected { background: #e74c3c; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+    height: calc(100vh - 120px);
+  }
+
+  .panel {
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .panel-header {
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-body {
+    padding: 10px 14px;
+    flex: 1;
+    overflow-y: auto;
+    background: var(--bg-tertiary);
+  }
+
+  /* Colors */
+  .panel.client { border: 2px solid var(--panel-client-border); }
+  .panel.client .panel-header { background: var(--panel-client-header-bg); color: var(--panel-client-header-color); }
+
+  .panel.broker { border: 2px solid var(--panel-broker-border); }
+  .panel.broker .panel-header { background: var(--panel-broker-header-bg); color: var(--panel-broker-header-color); }
+
+  .panel.datasource { border: 2px solid var(--panel-datasource-border); }
+  .panel.datasource .panel-header { background: var(--panel-datasource-header-bg); color: var(--panel-datasource-header-color); }
+
+  /* Buttons */
+  button {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+  button:hover { opacity: 0.85; }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-blue { background: #3498db; color: #fff; }
+  .btn-amber { background: #e67e22; color: #fff; }
+  .btn-green { background: #27ae60; color: #fff; }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--btn-outline-border);
+    color: var(--btn-outline-color);
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+  .btn-outline:hover { border-color: var(--btn-outline-hover-border); color: var(--btn-outline-hover-color); }
+
+  /* Split button */
+  .split-btn {
+    display: flex;
+    gap: 1px;
+    margin-bottom: 8px;
+  }
+  .split-btn button:first-child {
+    border-radius: 4px 0 0 4px;
+    flex: 1;
+  }
+  .split-btn button:last-child {
+    border-radius: 0 4px 4px 0;
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    border-left: 1px solid rgba(0,0,0,0.2);
+  }
+
+  /* Sections */
+  .section { margin-bottom: 12px; }
+  .section-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Event log */
+  .event-log {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .event {
+    background: var(--event-bg);
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    border-left: 3px solid #555;
+    animation: slideIn 0.3s ease-out;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .event.client-event { border-left-color: #3498db; }
+  .event.broker-event { border-left-color: #e67e22; }
+  .event.datasource-event { border-left-color: #27ae60; }
+
+  .event-type {
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 1px;
+  }
+  .event-detail { color: var(--event-detail); font-size: 0.78rem; }
+  .event-time { color: var(--event-time); font-size: 0.65rem; float: right; }
+
+  /* JSON details */
+  details { margin-top: 4px; }
+  details summary { cursor: pointer; font-size: 0.7rem; color: var(--details-summary); }
+  details pre {
+    background: var(--details-pre-bg);
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    overflow-x: auto;
+    margin-top: 3px;
+    color: var(--details-pre-color);
+    max-height: 150px;
+    overflow-y: auto;
+  }
+
+  /* State display */
+  .state-box {
+    background: var(--state-box-bg);
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 0.78rem;
+    margin-bottom: 4px;
+  }
+  .state-label { color: var(--state-label); font-size: 0.7rem; }
+  .state-value { color: var(--state-value); font-family: monospace; word-break: break-all; font-size: 0.78rem; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65rem;
+    font-weight: 600;
+  }
+  .badge-active { background: #27ae60; color: #fff; }
+  .badge-pending { background: #666; color: #ccc; }
+
+  /* Steps indicator */
+  .steps {
+    display: flex;
+    gap: 6px;
+    padding: 6px 24px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-primary);
+    flex-wrap: wrap;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 16px;
+    font-size: 0.73rem;
+    background: var(--step-bg);
+    color: var(--step-color);
+  }
+  .step.done { background: rgba(46,204,113,0.15); color: #2ecc71; }
+  .step.current { background: rgba(243,156,18,0.15); color: #f39c12; }
+  .step-num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.65rem;
+    background: rgba(255,255,255,0.1);
+  }
+  @media (prefers-color-scheme: light) {
+    .step-num {
+      background: rgba(0,0,0,0.1);
+    }
+  }
+  .step.done .step-num { background: #27ae60; color: #fff; }
+  .step.current .step-num { background: #e67e22; color: #fff; }
+
+  /* Knowledge cards */
+  .knowledge-card {
+    background: var(--knowledge-card-bg);
+    border: 1px solid var(--knowledge-card-border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    font-size: 0.78rem;
+  }
+  .knowledge-card .kc-title { font-weight: 600; color: var(--knowledge-title); font-size: 0.75rem; }
+  .knowledge-card .kc-detail { color: #aaa; font-size: 0.72rem; }
+  @media (prefers-color-scheme: light) {
+    .knowledge-card .kc-detail { color: #666; }
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+  }
+  @media (prefers-color-scheme: light) {
+    .spinner {
+      border-color: rgba(0,0,0,0.2);
+      border-top-color: #333;
+    }
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Footer */
+  .app-footer {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-primary);
+    padding: 12px 24px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .app-footer a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    margin: 0 8px;
+  }
+  .app-footer a:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+  }
+  .app-footer .separator {
+    color: var(--border-primary);
+  }
+
+  /* Mobile responsive styles */
+  @media (max-width: 1024px) {
+    .grid {
+      grid-template-columns: 1fr;
+      height: auto;
+      min-height: calc(100vh - 120px);
+    }
+    .panel {
+      min-height: 400px;
+    }
+    header {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    header h1 {
+      font-size: 1.1rem;
+    }
+    .steps {
+      padding: 6px 12px;
+      gap: 4px;
+    }
+    .step {
+      padding: 2px 6px;
+      font-size: 0.68rem;
+    }
+  }
+
+  @media (max-width: 600px) {
+    header {
+      padding: 10px 12px;
+    }
+    .patient-banner {
+      padding: 6px 12px;
+      flex-wrap: wrap;
+    }
+    .grid {
+      padding: 8px;
+      gap: 8px;
+    }
+    .panel-header {
+      padding: 8px 10px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .panel-body {
+      padding: 8px 10px;
+    }
+    .step {
+      padding: 2px 4px;
+      font-size: 0.65rem;
+    }
+    .step-num {
+      width: 16px;
+      height: 16px;
+      font-size: 0.6rem;
+    }
+    .split-btn {
+      flex-direction: column;
+    }
+    .split-btn button:first-child,
+    .split-btn button:last-child {
+      border-radius: 4px;
+    }
+    .split-btn button:last-child {
+      border-left: none;
+      border-top: 1px solid rgba(0,0,0,0.2);
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>FHIR Subscriptions Broker</h1>
+  <span class="subtitle">Real-time demo — CMS-Aligned Network</span>
+  <span style="margin-left:auto; font-size:0.75rem;">
+    <span class="status-dot disconnected" id="dot-client"></span>Client
+    <span class="status-dot disconnected" id="dot-broker" style="margin-left:6px;"></span>Broker
+    <span class="status-dot disconnected" id="dot-datasource" style="margin-left:6px;"></span>EHR
+  </span>
+</header>
+
+<div class="patient-banner" id="patient-banner">
+  <div class="avatar" id="patient-avatar">?</div>
+  <div>
+    <span class="name" id="patient-name">Generating patient...</span>
+    <span class="detail" id="patient-detail"></span>
+  </div>
+</div>
+
+<div class="steps" id="steps">
+  <div class="step" id="step-1"><span class="step-num">1</span> Authenticate</div>
+  <div class="step" id="step-2"><span class="step-num">2</span> Subscribe</div>
+  <div class="step" id="step-3"><span class="step-num">3</span> Trigger Event</div>
+  <div class="step" id="step-4"><span class="step-num">4</span> Notification Delivered</div>
+  <div class="step" id="step-5"><span class="step-num">5</span> Encounter Fetched</div>
+</div>
+
+<div class="grid">
+  <!-- Client Panel -->
+  <div class="panel client">
+    <div class="panel-header">
+      IAS Client Application
+      <span>
+        <span class="badge badge-pending" id="client-status">Unauthenticated</span>
+        <button class="btn-outline" onclick="doFullAuth()" style="margin-left:6px;">Show Details</button>
+      </span>
+    </div>
+    <div class="panel-body">
+      <div class="section">
+        <div class="section-title">Actions</div>
+        <div class="split-btn">
+          <button class="btn-blue" id="btn-auth-quick" onclick="doQuickAuth()">Auto-Onboard</button>
+          <button class="btn-blue" id="btn-auth-full" onclick="doFullAuth()">ID Proof</button>
+        </div>
+      </div>
+
+      <div class="section" id="client-state-section" style="display:none;">
+        <div class="section-title">Client State</div>
+        <div class="state-box">
+          <div class="state-label">Identity</div>
+          <div class="state-value" id="cs-identity">&mdash;</div>
+        </div>
+        <div class="state-box">
+          <div class="state-label">Patient Context (Broker ID)</div>
+          <div class="state-value" id="cs-patient">&mdash;</div>
+        </div>
+        <div class="state-box">
+          <div class="state-label">Subscription</div>
+          <div class="state-value" id="cs-sub">&mdash;</div>
+        </div>
+      </div>
+
+      <div class="section" id="encounters-section" style="display:none;">
+        <div class="section-title">Accumulated Knowledge</div>
+        <div id="client-encounters"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Event Log</div>
+        <div class="event-log" id="client-events"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Broker Panel -->
+  <div class="panel broker">
+    <div class="panel-header">
+      Subscriptions Broker
+      <span>
+        <span class="badge badge-active">Running</span>
+        <button class="btn-outline" onclick="window.open(BROKER,'_blank')" style="margin-left:6px;">Open Admin</button>
+      </span>
+    </div>
+    <div class="panel-body">
+      <div class="section">
+        <div class="section-title">Patient Mapping</div>
+        <div id="broker-mappings"><em style="color:#666;">Waiting for registration...</em></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Active Subscriptions</div>
+        <div id="broker-subs"><em style="color:#666;">None yet</em></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Event Log</div>
+        <div class="event-log" id="broker-events"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Source Panel -->
+  <div class="panel datasource">
+    <div class="panel-header">
+      Mercy General EHR
+      <span>
+        <span class="badge badge-active">Online</span>
+        <button class="btn-outline" onclick="window.open(EHR,'_blank')" style="margin-left:6px;">Open EHR</button>
+      </span>
+    </div>
+    <div class="panel-body">
+      <div class="section">
+        <div class="section-title">Patient</div>
+        <div class="state-box" id="ehr-patient-box">
+          <div class="state-value" id="ehr-patient-name">—</div>
+          <div class="state-label" id="ehr-patient-detail">—</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Create Encounter</div>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <select id="enc-class" style="flex:1; background:#1a3c2a; color:#e0e0e0; border:1px solid rgba(39,174,96,0.3); border-radius:4px; padding:4px 6px; font-size:0.78rem;">
+            <option value="EMER">Emergency (EMER)</option>
+            <option value="AMB">Ambulatory (AMB)</option>
+            <option value="IMP">Inpatient (IMP)</option>
+            <option value="OBSENC">Observation (OBSENC)</option>
+            <option value="SS">Short Stay (SS)</option>
+            <option value="VR">Virtual (VR)</option>
+          </select>
+          <select id="enc-type" style="flex:1; background:#1a3c2a; color:#e0e0e0; border:1px solid rgba(39,174,96,0.3); border-radius:4px; padding:4px 6px; font-size:0.78rem;">
+            <option value="50849002">ED Visit</option>
+            <option value="185349003">Check-up</option>
+            <option value="308335008">Procedure</option>
+            <option value="390906007">Follow-up</option>
+            <option value="281036007">Consultation</option>
+            <option value="32485007">Hospital Admission</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:6px;">
+          <select id="enc-reason" style="flex:1; background:#1a3c2a; color:#e0e0e0; border:1px solid rgba(39,174,96,0.3); border-radius:4px; padding:4px 6px; font-size:0.78rem;">
+            <option value="">No reason code</option>
+            <option value="29857009">Chest pain</option>
+            <option value="386661006">Fever</option>
+            <option value="25064002">Headache</option>
+            <option value="267036007">Dyspnea</option>
+            <option value="161891005">Back pain</option>
+            <option value="422587007">Nausea</option>
+            <option value="3723001">Arthritis</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:6px; align-items:center;">
+          <button class="btn-green" id="btn-trigger" onclick="doTrigger('now')" disabled style="flex:1;">Admit Now</button>
+          <button class="btn-green" id="btn-schedule" onclick="doTrigger('planned')" disabled style="flex:1; background:#2471a3;">Schedule</button>
+          <input type="date" id="enc-date" style="background:#1a3c2a; color:#e0e0e0; border:1px solid rgba(39,174,96,0.3); border-radius:4px; padding:4px 6px; font-size:0.78rem; width:130px;">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Event Log</div>
+        <div class="event-log" id="datasource-events"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Service URLs injected by server via injectHtmlConfig()
+const BROKER = __BROKER__;
+const CLIENT = __CLIENT__;
+const EHR = __EHR__;
+var IS_STATIC = typeof __STATIC__ !== "undefined" && __STATIC__;
+
+// --- Mode-aware fetch & SSE ---
+// In static mode, API calls go to in-page handlers via __apiFetch.
+// In server mode, standard fetch and EventSource are used.
+function apiFetch(url, init) {
+  if (IS_STATIC && window.__apiFetch) return window.__apiFetch(url, init);
+  return fetch(url, init);
+}
+
+// --- Generate random patient identity for this tab ---
+const FIRST_NAMES = ["Alice","Maria","James","Carlos","Priya","Kenji","Fatima","Elena","David","Sarah","Omar","Yuki","Rosa","Thomas","Amara","Liam","Sofia","Andre","Mei","Noah","Zara","Ivan","Nia","Leo","Grace","Raj","Hana","Oscar","Chloe","Felix"];
+const MIDDLE_INITIALS = "A B C D E F G H J K L M N P R S T V W".split(" ");
+const LAST_NAMES = ["Rodriguez","Chen","Patel","Okafor","Kim","Mueller","Santos","Nakamura","Thompson","Garcia","Andersen","Nguyen","Kowalski","Hassan","Yamamoto","Rivera","Johansson","Abadi","Reeves","Park","Ferreira","Ivanova","Mensah","Larsson","Delgado","Tanaka","Morrison","Gupta","Fischer","Rossi"];
+
+function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generateRandomPatient() {
+  var first = randomItem(FIRST_NAMES);
+  var middle = randomItem(MIDDLE_INITIALS);
+  var last = randomItem(LAST_NAMES);
+  var name = first + " " + middle + " " + last;
+  var year = 1950 + Math.floor(Math.random() * 50);
+  var month = String(1 + Math.floor(Math.random() * 12)).padStart(2, "0");
+  var day = String(1 + Math.floor(Math.random() * 28)).padStart(2, "0");
+  var birthDate = year + "-" + month + "-" + day;
+  return { name: name, birthDate: birthDate };
+}
+
+// Restore or generate patient for this tab
+var stored = sessionStorage.getItem("demo-patient");
+var MY_PATIENT = stored ? JSON.parse(stored) : generateRandomPatient();
+if (!stored) sessionStorage.setItem("demo-patient", JSON.stringify(MY_PATIENT));
+
+// IDs we learn from registrations (filled during onboarding)
+var MY_BROKER_ID = sessionStorage.getItem("demo-brokerId") || null;
+var MY_SOURCE_ID = sessionStorage.getItem("demo-sourceId") || null;
+var ONBOARDED = sessionStorage.getItem("demo-onboarded") === "true";
+
+// Patient key for filtering client events
+var MY_PATIENT_KEY = MY_PATIENT.name + "|" + MY_PATIENT.birthDate;
+
+// Display patient banner
+var initials = MY_PATIENT.name.split(" ").map(function(w){ return w[0]; }).join("").slice(0,2);
+document.getElementById("patient-avatar").textContent = initials;
+document.getElementById("patient-name").textContent = MY_PATIENT.name;
+document.getElementById("patient-detail").textContent = "DOB: " + MY_PATIENT.birthDate;
+
+// --- SSE connections ---
+function connectSSE(url, logEl, dotEl, cssClass, filterFn) {
+  if (IS_STATIC && window.__sseSubscribe) {
+    // Static mode: read the handler's streaming response directly
+    var sub = window.__sseSubscribe(url, {
+      onopen: function() { dotEl.className = "status-dot connected"; },
+      onerror: function() { dotEl.className = "status-dot disconnected"; },
+      onmessage: function(dataStr) {
+        try {
+          var data = JSON.parse(dataStr);
+          if (data.type === "state-sync") { handleStateSync(cssClass, data); return; }
+          if (filterFn && !filterFn(data)) return;
+          addEvent(logEl, data, cssClass);
+          handleEvent(cssClass, data);
+        } catch(err) {}
+      },
+    });
+    return sub;
+  }
+  // Server mode: real EventSource
+  var es = new EventSource(url);
+  es.onopen = function() { dotEl.className = "status-dot connected"; };
+  es.onerror = function() { dotEl.className = "status-dot disconnected"; };
+  es.onmessage = function(e) {
+    try {
+      var data = JSON.parse(e.data);
+      if (data.type === "state-sync") {
+        handleStateSync(cssClass, data);
+        return;
+      }
+      if (filterFn && !filterFn(data)) return;
+      addEvent(logEl, data, cssClass);
+      handleEvent(cssClass, data);
+    } catch(err) {}
+  };
+  return es;
+}
+
+function addEvent(logEl, data, cssClass) {
+  var div = document.createElement("div");
+  div.className = "event " + cssClass;
+  var time = new Date(data.timestamp || Date.now()).toLocaleTimeString();
+  var html = '<span class="event-time">' + time + '</span>';
+  html += '<div class="event-type">' + (data.type || "event") + '</div>';
+  html += '<div class="event-detail">' + (data.detail || "") + '</div>';
+  if (data.resource) {
+    html += '<details><summary>FHIR JSON</summary><pre>' + JSON.stringify(data.resource, null, 2) + '</pre></details>';
+  }
+  if (data.permissionTicket) {
+    html += '<details><summary>Permission Ticket (JWT)</summary><pre>' + formatJwt(data.permissionTicket) + '</pre></details>';
+  }
+  if (data.clientAssertion) {
+    html += '<details><summary>Client Assertion (JWT)</summary><pre>' + formatJwt(data.clientAssertion) + '</pre></details>';
+  }
+  if (data.requestUrl) {
+    html += '<details><summary>HTTP Request</summary><pre>GET ' + data.requestUrl + '\nAuthorization: Bearer &lt;access_token&gt;\nAccept: application/fhir+json</pre></details>';
+  }
+  div.innerHTML = html;
+  logEl.prepend(div);
+}
+
+function formatJwt(jwt) {
+  try {
+    var parts = jwt.split(".");
+    var header = JSON.parse(atob(parts[0]));
+    var payload = JSON.parse(atob(parts[1]));
+    return "Header:\n" + JSON.stringify(header, null, 2) + "\n\nPayload:\n" + JSON.stringify(payload, null, 2);
+  } catch(e) { return jwt; }
+}
+
+// --- State sync handlers ---
+function handleStateSync(source, data) {
+  if (source === "client-event" && data.sessions) {
+    var mySession = data.sessions.find(function(s){ return s.patientKey === MY_PATIENT_KEY; });
+    if (mySession) syncClientState(mySession);
+  }
+  if (source === "broker-event") {
+    syncBrokerState(data);
+  }
+  if (source === "datasource-event") {
+    syncDataSourceState(data);
+  }
+}
+
+function syncClientState(session) {
+  if (session.identity || session.token || (session.subscriptions && session.subscriptions.length)) {
+    updateClientPanel(session);
+  }
+  if (session.encounters && session.encounters.length) {
+    session.encounters.forEach(function(enc) { addEncounterKnowledge(enc); });
+  }
+}
+
+function syncBrokerState(data) {
+  if (!MY_BROKER_ID) return;
+  if (data.subscriptions) {
+    var mySubs = data.subscriptions.filter(function(s) {
+      return s.criteria && s.criteria.includes(MY_BROKER_ID);
+    });
+    if (mySubs.length) {
+      document.getElementById("broker-subs").innerHTML = mySubs.map(function(s) {
+        return '<div class="state-box"><div class="state-value">' + (s.id || "sub") + '</div><div class="state-label">Encounter monitoring — ' + (s.status || "active") + '</div></div>';
+      }).join("");
+    }
+  }
+  if (data.mappings) {
+    var myMappings = data.mappings.filter(function(m) {
+      return m.broker === MY_BROKER_ID;
+    });
+    if (myMappings.length) {
+      document.getElementById("broker-mappings").innerHTML = myMappings.map(function(m) {
+        return '<div class="state-box"><div class="state-value">' + m.source + ' &rarr; ' + m.broker + '</div><div class="state-label">Data Source &rarr; Broker</div></div>';
+      }).join("");
+    }
+  }
+}
+
+function syncDataSourceState(data) {
+  // We'll get patient and encounter info from events
+}
+
+function updateClientPanel(state) {
+  document.getElementById("client-state-section").style.display = "";
+  if (state.identity) {
+    document.getElementById("cs-identity").textContent = state.identity.name + " (" + (state.identity.verified ? "IAL2 Verified" : "Pending") + ")";
+  }
+  if (state.token) {
+    document.getElementById("cs-patient").textContent = state.token.patient;
+    document.getElementById("client-status").textContent = "Authenticated";
+    document.getElementById("client-status").className = "badge badge-active";
+    markStep(1);
+  }
+  if (state.subscriptions && state.subscriptions.length) {
+    var sub = state.subscriptions[state.subscriptions.length - 1];
+    document.getElementById("cs-sub").textContent = (sub.id || "sub") + " — active";
+    markStep(2);
+  }
+  document.getElementById("btn-auth-quick").disabled = true;
+  document.getElementById("btn-auth-quick").textContent = "Onboarded";
+  document.getElementById("btn-auth-full").disabled = true;
+}
+
+var knownEncounterIds = {};
+function addEncounterKnowledge(enc) {
+  var encId = enc.id || Math.random().toString();
+  if (knownEncounterIds[encId]) return;
+  knownEncounterIds[encId] = true;
+  document.getElementById("encounters-section").style.display = "";
+  var container = document.getElementById("client-encounters");
+  var card = document.createElement("div");
+  card.className = "knowledge-card";
+  card.innerHTML =
+    '<div class="kc-title">' + ((enc.type && enc.type[0] && enc.type[0].coding && enc.type[0].coding[0]) ? enc.type[0].coding[0].display : "Encounter") + '</div>' +
+    '<div class="kc-detail">' + (enc.serviceProvider ? enc.serviceProvider.display : "") + ' &mdash; ' + (enc.status || "") + '</div>' +
+    '<div class="kc-detail">Patient: ' + (enc.subject ? enc.subject.reference : "") + ' | ID: ' + (enc.id || "") + '</div>' +
+    '<details><summary>Full resource</summary><pre>' + JSON.stringify(enc, null, 2) + '</pre></details>';
+  container.prepend(card);
+}
+
+// --- Event handlers ---
+function handleEvent(source, data) {
+  if (source === "broker-event") {
+    if (data.type === "subscription-created" && data.resource && MY_BROKER_ID && data.resource.criteria && data.resource.criteria.includes(MY_BROKER_ID)) {
+      document.getElementById("broker-subs").innerHTML =
+        '<div class="state-box"><div class="state-value">' + (data.resource.id || "sub") + '</div><div class="state-label">Encounter monitoring — active</div></div>';
+      markStep(2);
+    }
+    if (data.type === "patient-registered" || data.type === "patient-linked") {
+      if (MY_BROKER_ID && data.detail && data.detail.includes(MY_BROKER_ID)) {
+        document.getElementById("broker-mappings").innerHTML =
+          '<div class="state-box"><div class="state-value">' + (MY_SOURCE_ID || "?") + ' &rarr; ' + MY_BROKER_ID + '</div><div class="state-label">Data Source &rarr; Broker</div></div>';
+      }
+    }
+    if (data.type === "notification-delivered") markStep(4);
+  }
+  if (source === "client-event") {
+    if (data.type === "authenticated") {
+      document.getElementById("client-state-section").style.display = "";
+      document.getElementById("cs-patient").textContent = data.response ? data.response.patient : "?";
+      document.getElementById("client-status").textContent = "Authenticated";
+      document.getElementById("client-status").className = "badge badge-active";
+      document.getElementById("btn-auth-quick").disabled = true;
+      document.getElementById("btn-auth-quick").textContent = "Onboarded";
+      document.getElementById("btn-auth-full").disabled = true;
+      markStep(1);
+      // Now we know the broker ID from the token response
+      if (data.response && data.response.patient && !MY_BROKER_ID) {
+        MY_BROKER_ID = data.response.patient;
+        sessionStorage.setItem("demo-brokerId", MY_BROKER_ID);
+      }
+      unlockPanels();
+    }
+    if (data.type === "identity-verified") {
+      document.getElementById("client-state-section").style.display = "";
+      document.getElementById("cs-identity").textContent = data.detail;
+    }
+    if (data.type === "subscribed") {
+      document.getElementById("cs-sub").textContent = (data.resource ? data.resource.id : "sub") + " — active";
+      markStep(2);
+    }
+    if (data.type === "id-proofing") {
+      document.getElementById("client-state-section").style.display = "";
+      document.getElementById("cs-identity").innerHTML = '<span class="spinner"></span> ' + data.detail;
+    }
+    if (data.type === "encounter-fetched") {
+      markStep(5);
+      if (data.resource) addEncounterKnowledge(data.resource);
+    }
+  }
+  if (source === "datasource-event") {
+    if (data.type === "encounter-created") markStep(3);
+  }
+}
+
+// --- Filtering functions ---
+function filterClientEvent(data) {
+  // Only show events for our patient
+  if (data._patientKey && data._patientKey !== MY_PATIENT_KEY) return false;
+  return true;
+}
+
+function filterBrokerEvent(data) {
+  // Before we know our broker ID, show nothing (except registrations)
+  if (!MY_BROKER_ID) {
+    return data.type === "patient-registered" || data.type === "patient-linked";
+  }
+  // Show events mentioning our broker ID
+  if (data.detail && data.detail.includes(MY_BROKER_ID)) return true;
+  // Show events mentioning our source ID (e.g., event-received from data source)
+  if (MY_SOURCE_ID && data.detail && data.detail.includes(MY_SOURCE_ID)) return true;
+  // Show subscription events for our patient
+  if (data.resource && data.resource.criteria && data.resource.criteria.includes(MY_BROKER_ID)) return true;
+  // Show notification delivery events (these follow immediately after our patient-matched)
+  if (data.type === "notification-sending" || data.type === "notification-delivered") return true;
+  return false;
+}
+
+function filterEhrEvent(data) {
+  if (!MY_SOURCE_ID) {
+    return data.type === "patient-registered" || data.type === "patient-auto-registered";
+  }
+  if (data.sourceId === MY_SOURCE_ID) return true;
+  if (data.detail && data.detail.includes(MY_SOURCE_ID)) return true;
+  return false;
+}
+
+// --- Initialize SSE + state restore (deferred in static mode) ---
+function initConnections() {
+  connectSSE(CLIENT + "/events", document.getElementById("client-events"), document.getElementById("dot-client"), "client-event", filterClientEvent);
+  connectSSE(BROKER + "/events", document.getElementById("broker-events"), document.getElementById("dot-broker"), "broker-event", filterBrokerEvent);
+  connectSSE(EHR + "/events", document.getElementById("datasource-events"), document.getElementById("dot-datasource"), "datasource-event", filterEhrEvent);
+
+  // Restore state if already onboarded
+  if (ONBOARDED && MY_BROKER_ID) {
+    unlockPanels();
+    apiFetch(CLIENT + "/state?name=" + encodeURIComponent(MY_PATIENT.name) + "&birthDate=" + MY_PATIENT.birthDate)
+      .then(function(r){ return r.json(); })
+      .then(function(s){
+        if (s.token) updateClientPanel(s);
+        if (s.encounters) s.encounters.forEach(function(enc){ addEncounterKnowledge(enc); });
+      }).catch(function(){});
+  }
+}
+
+if (IS_STATIC) {
+  if (window.__staticReady) { initConnections(); }
+  else { window.addEventListener("static-runtime-ready", initConnections); }
+} else {
+  initConnections();
+}
+
+function unlockPanels() {
+  document.getElementById("btn-trigger").disabled = false;
+  document.getElementById("btn-schedule").disabled = false;
+  // Set default scheduled date to tomorrow
+  var tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById("enc-date").value = tomorrow.toISOString().split("T")[0];
+  document.getElementById("ehr-patient-name").textContent = MY_PATIENT.name;
+  document.getElementById("ehr-patient-detail").textContent = "DOB: " + MY_PATIENT.birthDate + (MY_SOURCE_ID ? " | MRN: " + MY_SOURCE_ID : "");
+  ONBOARDED = true;
+  sessionStorage.setItem("demo-onboarded", "true");
+}
+
+// --- Actions ---
+async function doQuickAuth() {
+  var btn = document.getElementById("btn-auth-quick");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Setting up...';
+  document.getElementById("btn-auth-full").disabled = true;
+
+  try {
+    // Step 1: Register patient with broker (dashboard orchestrates)
+    var brokerResp = await apiFetch(BROKER + "/register-patient", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ sourceId: "pending", name: MY_PATIENT.name, birthDate: MY_PATIENT.birthDate }),
+    });
+    var brokerData = await brokerResp.json();
+    MY_BROKER_ID = brokerData.brokerId;
+    sessionStorage.setItem("demo-brokerId", MY_BROKER_ID);
+
+    // Step 2: Register patient with Mercy EHR
+    var ehrResp = await apiFetch(EHR + "/register-patient", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ name: MY_PATIENT.name, birthDate: MY_PATIENT.birthDate }),
+    });
+    var ehrData = await ehrResp.json();
+    MY_SOURCE_ID = ehrData.sourceId;
+    sessionStorage.setItem("demo-sourceId", MY_SOURCE_ID);
+
+    // Step 2b: Link source ID in broker
+    await apiFetch(BROKER + "/register-patient", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ sourceId: MY_SOURCE_ID, name: MY_PATIENT.name, birthDate: MY_PATIENT.birthDate }),
+    });
+
+    // Step 3: Tell client to onboard (just demographics — client does the rest)
+    var clientResp = await apiFetch(CLIENT + "/quick-auth", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ patient: MY_PATIENT }),
+    });
+    var state = await clientResp.json();
+    if (state.token) {
+      MY_BROKER_ID = state.token.patient;
+      sessionStorage.setItem("demo-brokerId", MY_BROKER_ID);
+    }
+
+    updateClientPanel(state);
+    unlockPanels();
+    btn.textContent = "Onboarded";
+  } catch (e) {
+    console.error("[dashboard] doQuickAuth failed:", e);
+    btn.textContent = "Failed — retry";
+    btn.disabled = false;
+    document.getElementById("btn-auth-full").disabled = false;
+  }
+}
+
+function doFullAuth() {
+  // Open client UI with opaque hint (base64-encoded patient context)
+  var hint = btoa(JSON.stringify(MY_PATIENT));
+  window.open(CLIENT + "?hint=" + encodeURIComponent(hint), "_blank");
+  document.getElementById("btn-auth-full").textContent = "Onboarding...";
+  document.getElementById("btn-auth-full").disabled = true;
+  document.getElementById("btn-auth-quick").disabled = true;
+}
+
+async function doTrigger(mode) {
+  var btn = mode === "planned" ? document.getElementById("btn-schedule") : document.getElementById("btn-trigger");
+  var otherBtn = mode === "planned" ? document.getElementById("btn-trigger") : document.getElementById("btn-schedule");
+  btn.disabled = true;
+  otherBtn.disabled = true;
+  btn.textContent = mode === "planned" ? "Scheduling..." : "Admitting...";
+
+  var encounterOptions = {
+    classCode: document.getElementById("enc-class").value,
+    typeCode: document.getElementById("enc-type").value,
+    reasonCode: document.getElementById("enc-reason").value || undefined,
+  };
+  if (mode === "planned") {
+    encounterOptions.status = "planned";
+    encounterOptions.scheduledDate = document.getElementById("enc-date").value || undefined;
+  }
+
+  try {
+    await apiFetch(EHR + "/trigger-event", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ patient: MY_PATIENT, encounterOptions: encounterOptions }),
+    });
+    btn.textContent = mode === "planned" ? "Schedule" : "Admit Now";
+    btn.disabled = false;
+    otherBtn.disabled = false;
+  } catch (e) {
+    console.error("[dashboard] doTrigger failed:", e);
+    btn.textContent = "Failed — retry";
+    btn.disabled = false;
+    otherBtn.disabled = false;
+  }
+}
+
+// --- Step tracking ---
+var completedSteps = {};
+function markStep(n) {
+  completedSteps[n] = true;
+  var maxDone = 0;
+  for (var i = 1; i <= 5; i++) {
+    var el = document.getElementById("step-" + i);
+    if (completedSteps[i]) {
+      el.className = "step done";
+      if (i > maxDone) maxDone = i;
+    } else if (i === maxDone + 1) {
+      el.className = "step current";
+    } else {
+      el.className = "step";
+    }
+  }
+}
+</script>
+
+<footer class="app-footer">
+  <a href="https://github.com/jmandel/cms-fhir-subscriptions-broker" target="_blank">📄 GitHub</a>
+  <span class="separator">|</span>
+  <a href="https://www.cms.gov/priorities/key-initiatives/interoperability" target="_blank">🏥 CMS Interoperability</a>
+</footer>
+
+</body>
+</html>
